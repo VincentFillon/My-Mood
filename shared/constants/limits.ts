@@ -1,0 +1,11 @@
+export const MAX_GROUP_MEMBERS_FREE = 6;
+export const MAX_MESSAGE_LENGTH = 2000;
+export const MOOD_HISTORY_DAYS_FREE = 30;
+export const MESSAGE_RETENTION_DAYS_FREE = 90;
+export const STORAGE_LIMIT_FREE_MB = 500;
+export const TOKEN_EXPIRY_ACCESS_MS = 15 * 60 * 1000;
+export const TOKEN_EXPIRY_REFRESH_MS = 7 * 24 * 60 * 60 * 1000;
+export const RATE_LIMIT_GLOBAL = 100;
+export const RATE_LIMIT_AUTH = 10;
+export const RATE_LIMIT_UPLOAD = 20;
+export const SIGNED_URL_EXPIRY_MS = 60 * 60 * 1000;

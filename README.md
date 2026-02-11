@@ -99,18 +99,76 @@ Adoption bottom-up en freemium : les equipes adoptent gratuitement, l'entreprise
 
 ## Developpement
 
+### Prerequisites
+
+- Node.js 20+ LTS
+- Docker & Docker Compose
+- pnpm 10+
+
+### Installation et premier lancement
+
 ```bash
-# Prerequisites
-# Node.js 20+, Docker, PostgreSQL
+# 1. Cloner le repo et installer les dependances
+git clone <repo-url>
+cd my-mood
 
-# Installation
-npm install
+# 2. Creer le fichier .env a partir du template
+cp .env.example .env
 
-# Demarrage en dev
-npm run start:dev
+# 3. Installer les dependances frontend
+cd frontend
+pnpm install
+cd ..
+
+# 4. Installer les dependances backend
+cd backend
+pnpm install
+cd ..
+
+# 5. Demarrer PostgreSQL via Docker
+docker compose up -d postgres
+
+# 6. Executer la migration initiale Prisma (OBLIGATOIRE au premier lancement)
+cd backend
+npx prisma migrate dev --name init
+cd ..
+
+# 7. Demarrer le backend en watch mode
+cd backend
+pnpm start:dev
+# Le backend sera accessible sur http://localhost:3000
+
+# 8. Dans un autre terminal, demarrer le frontend
+cd frontend
+pnpm start
+# Le frontend sera accessible sur http://localhost:4200
 ```
 
-> Les instructions detaillees de setup seront ajoutees au fur et a mesure du developpement.
+### Workflow de developpement quotidien
+
+```bash
+# Demarrer tous les services (PostgreSQL uniquement)
+docker compose up -d postgres
+
+# Backend (terminal 1)
+cd backend && pnpm start:dev
+
+# Frontend (terminal 2)
+cd frontend && pnpm start
+```
+
+### Build de production avec Docker
+
+```bash
+# Build et demarrage complet via Docker Compose
+docker compose up --build
+```
+
+### Notes importantes
+
+- **Prisma migrations**: La commande `prisma migrate dev --name init` doit etre executee manuellement au premier setup car l'environnement sandbox ne peut pas acceder au PostgreSQL Docker.
+- **Shared folder**: Le dossier `shared/` contient les types et schemas partages entre frontend et backend, resolus via `tsconfig paths`.
+- **Hot reload**: Les deux projets (frontend et backend) supportent le hot reload en developpement.
 
 ---
 

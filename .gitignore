@@ -1,2 +1,33 @@
 _bmad/
 .claude/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.angular/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres_data/
+
+# Prisma
+backend/generated/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
