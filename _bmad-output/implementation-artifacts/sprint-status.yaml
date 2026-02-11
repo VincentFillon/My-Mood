@@ -1,0 +1,101 @@
+# generated: 2026-02-11
+# project: my-mood
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-02-11
+project: my-mood
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Epic 1: Inscription, Authentification & Profil Utilisateur
+  epic-1: backlog
+  1-1-initialisation-du-projet-et-infrastructure-de-developpement: backlog
+  1-2-inscription-utilisateur: backlog
+  1-3-connexion-et-deconnexion: backlog
+  1-4-gestion-du-profil-utilisateur: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Creation de Groupe & Invitations
+  epic-2: backlog
+  2-1-creation-de-groupe-et-isolation-des-donnees-rls: backlog
+  2-2-invitation-par-lien-unique-et-rejoindre-un-groupe: backlog
+  2-3-gestion-des-membres-et-limites-du-plan-free: backlog
+  2-4-quitter-un-groupe: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Grille d'Humeur & Interactions Sociales
+  epic-3: backlog
+  3-1-selection-et-modification-dhumeur-via-le-moodribbon: backlog
+  3-2-grille-orbitale-des-humeurs-en-temps-reel-orbitalgrid-sse: backlog
+  3-3-reactions-emoji-aux-humeurs: backlog
+  3-4-historique-dhumeur-personnel-et-mediane-dequipe: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Messagerie Groupe & Salons
+  epic-4: backlog
+  4-1-salon-principal-automatique-et-liste-des-salons: backlog
+  4-2-creation-et-gestion-de-salons: backlog
+  4-3-envoi-et-affichage-de-messages-texte-en-temps-reel: backlog
+  4-4-partage-de-medias-dans-les-messages-images-et-gifs: backlog
+  4-5-emojis-dans-les-messages-et-reactions-aux-messages: backlog
+  4-6-retention-des-messages-et-limites-de-stockage-plan-free: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Mini-Defi Quotidien
+  epic-5: backlog
+  5-1-affichage-du-mini-defi-quotidien: backlog
+  5-2-participation-au-mini-defi: backlog
+  5-3-classement-et-historique-des-mini-defis: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Onboarding, Notifications & PWA
+  epic-6: backlog
+  6-1-onboarding-guide-en-3-5-etapes-spotlight-coach-marks: backlog
+  6-2-notifications-push-pwa: backlog
+  6-3-installation-pwa-et-mode-offline-minimal: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Moderation & Signalement
+  epic-7: backlog
+  7-1-signalement-de-contenu-par-un-membre: backlog
+  7-2-notification-admin-et-gestion-des-signalements: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: Conformite RGPD (Suppression & Export)
+  epic-8: backlog
+  8-1-suppression-de-compte-et-cascade-complete: backlog
+  8-2-export-complet-des-donnees-personnelles: backlog
+  epic-8-retrospective: optional
