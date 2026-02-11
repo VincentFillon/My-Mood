@@ -907,7 +907,7 @@ flowchart TD
 
 **Cas limites :**
 - Perte de connexion pendant le changement → retry automatique + indicateur "en attente" sur l'avatar
-- Changements rapides successifs → debounce de 2 secondes, seul le dernier est envoyé
+- Changements rapides successifs → debounce de 500ms, seul le dernier est envoyé
 - Équipe vide (premier utilisateur) → message système adapté : "Tu es le premier ! Invite tes collègues."
 
 ### Journey Patterns
