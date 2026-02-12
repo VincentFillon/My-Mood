@@ -18,11 +18,6 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
-export function validateEnv(): Env {
-  try {
-    return envSchema.parse(process.env);
-  } catch (error) {
-    console.error('❌ Invalid environment variables:', error);
-    throw new Error('Invalid environment configuration');
-  }
+export function validateEnv(config: Record<string, unknown>): Env {
+  return envSchema.parse(config);
 }

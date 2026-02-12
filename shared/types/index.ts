@@ -4,4 +4,9 @@ export type {
   ApiErrorResponse,
 } from '../schemas/common.schema';
 
+export type {
+  RegisterInput,
+  RegisterResponse,
+} from '../schemas/auth.schema';
+
 export type { ErrorCode } from '../constants/errors';

@@ -3,7 +3,13 @@
   "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
+  "extensionsToTreatAsEsm": [".ts"],
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.ts$": ["ts-jest", { "useESM": true }]
+  },
+  "moduleNameMapper": {
+    "^@shared/(.*)\\.js$": "<rootDir>/../../shared/$1",
+    "^@shared/(.*)$": "<rootDir>/../../shared/$1",
+    "^(\\.{1,2}/.*)\\.js$": "$1"
   }
 }
