@@ -1,6 +1,6 @@
 # Story 1.2: Inscription utilisateur
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -481,11 +481,34 @@ Claude Opus 4.6
 ### Completion Notes List
 
 - 8 tasks complétées, toutes les Acceptance Criteria couvertes
-- Backend unit tests : 7/7 (app.controller + auth.service 4 tests + auth.controller 2 tests)
-- Frontend tests : 9/9 (app 2 tests + register 7 tests)
-- Backend e2e tests : 5/5 (app GET / + auth register flow 4 tests)
+- Backend unit tests : 8/8 (app.controller + auth.service 4 tests + auth.controller 3 tests)
+- Frontend tests : 12/12 (app 2 tests + register 10 tests)
+- Backend e2e tests : 6/6 (app GET / + auth register flow 5 tests)
 - Flow complet vérifié via curl : register → JWT + user, duplicate → 409, validation → 400
 - PrismaService ferme proprement le pg.Pool dans onModuleDestroy
+
+### Senior Developer Review (AI)
+
+**Reviewer:** Claude Opus 4.6 — 2026-02-12
+**Verdict:** Approved with fixes applied
+
+**13 issues found (5 HIGH, 5 MEDIUM, 3 LOW) — 10 fixed, 3 LOW accepted:**
+
+| # | Sev | Issue | Fix |
+|---|-----|-------|-----|
+| H1 | HIGH | `errorInterceptor` was a no-op (catch+rethrow unchanged) | Implemented structured API error parsing with `ApiError` interface |
+| H2 | HIGH | `auth.controller.spec.ts` missing ConflictException propagation test | Added test for error propagation |
+| H3 | HIGH | AC5 rate limiting never tested (unit or e2e) | Added e2e rate limiting test |
+| H4 | HIGH | `process.env['NODE_ENV']` used directly instead of ConfigService | Injected ConfigService in AuthController |
+| H5 | HIGH | Magic number `10` in @Throttle instead of `RATE_LIMIT_AUTH` constant | Used `RATE_LIMIT_AUTH` from shared/constants/limits |
+| M1 | MED | `findByEmail` selected `passwordHash` unnecessarily | Split into `findByEmail` (no hash) + `findByEmailWithCredentials` |
+| M2 | MED | Frontend tests only tested Zod validation, not registration flow | Added 3 tests: AuthService call, validation guard, server error display |
+| M3 | MED | Redundant `serverError` signal copied from `authService.error()` | Aliased directly to `authService.error` |
+| M4 | MED | Timing side-channel revealed email existence | Reordered: hash password before checking email existence |
+| M5 | MED | `gdprConsent as true` dangerous type cast | Removed cast: pass raw form to `safeParse`, use `result.data` |
+| L1 | LOW | `EMAIL_ALREADY_EXISTS` code defined but never used | Accepted — may be used for granular error codes later |
+| L2 | LOW | `/login` route points to RegisterComponent | Accepted — placeholder for story 1.3 |
+| L3 | LOW | Unused deps: passport, passport-jwt, @nestjs/passport | Accepted — forward dependencies for story 1.3 |
 
 ### File List
 
@@ -497,18 +520,18 @@ Claude Opus 4.6
 - `backend/src/auth/auth.service.ts` — register(), generateTokens()
 - `backend/src/auth/auth.controller.ts` — POST /api/v1/auth/register
 - `backend/src/auth/auth.service.spec.ts` — 4 tests unitaires
-- `backend/src/auth/auth.controller.spec.ts` — 2 tests unitaires
+- `backend/src/auth/auth.controller.spec.ts` — 3 tests unitaires
 - `backend/src/users/users.module.ts` — UsersModule
-- `backend/src/users/users.service.ts` — findByEmail(), create()
+- `backend/src/users/users.service.ts` — findByEmail(), findByEmailWithCredentials(), create()
 - `backend/src/common/pipes/zod-validation.pipe.ts` — ZodValidationPipe
 - `backend/src/common/filters/global-exception.filter.ts` — GlobalExceptionFilter
 - `backend/src/common/interceptors/response-wrapper.interceptor.ts` — ResponseWrapperInterceptor
-- `backend/test/e2e/auth.e2e-spec.ts` — 4 tests e2e
+- `backend/test/e2e/auth.e2e-spec.ts` — 5 tests e2e
 - `backend/.npmrc` — Approbation build argon2
 - `frontend/src/app/features/auth/register.ts` — RegisterComponent standalone
-- `frontend/src/app/features/auth/register.spec.ts` — 7 tests Vitest
+- `frontend/src/app/features/auth/register.spec.ts` — 10 tests Vitest
 - `frontend/src/app/core/auth/auth.service.ts` — AuthService Signal-based
-- `frontend/src/app/core/interceptors/error.interceptor.ts` — ErrorInterceptor
+- `frontend/src/app/core/interceptors/error.interceptor.ts` — ErrorInterceptor + ApiError interface
 
 **Fichiers modifiés :**
 - `backend/prisma/schema.prisma` — Ajout model User

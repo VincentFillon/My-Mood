@@ -1,19 +1,40 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { RegisterComponent } from './register';
+import { AuthService } from '../../core/auth/auth.service';
+
+function createMockAuthService() {
+  const errorSignal = signal<string | null>(null);
+  const loadingSignal = signal(false);
+  return {
+    register: vi.fn().mockResolvedValue(undefined),
+    loading: loadingSignal.asReadonly(),
+    error: errorSignal.asReadonly(),
+    currentUser: signal(null).asReadonly(),
+    isAuthenticated: signal(false).asReadonly(),
+    accessToken: null as string | null,
+    _errorSignal: errorSignal,
+    _loadingSignal: loadingSignal,
+  };
+}
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
+  let mockAuthService: ReturnType<typeof createMockAuthService>;
 
   beforeEach(async () => {
+    mockAuthService = createMockAuthService();
+
     await TestBed.configureTestingModule({
       imports: [RegisterComponent],
       providers: [
         provideRouter([]),
         provideHttpClient(),
+        { provide: AuthService, useValue: mockAuthService },
       ],
     }).compileComponents();
 
@@ -79,5 +100,37 @@ describe('RegisterComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const errorElements = compiled.querySelectorAll('.text-\\[\\#F44336\\]');
     expect(errorElements.length).toBeGreaterThan(0);
+  });
+
+  it('should call authService.register with valid data', async () => {
+    component.form = { name: 'Test', email: 'test@test.com', password: 'password123', gdprConsent: true };
+    await component.onSubmit();
+
+    expect(mockAuthService.register).toHaveBeenCalledWith({
+      name: 'Test',
+      email: 'test@test.com',
+      password: 'password123',
+      gdprConsent: true,
+    });
+  });
+
+  it('should not call authService.register when validation fails', async () => {
+    component.form = { name: '', email: 'bad', password: '123', gdprConsent: false };
+    await component.onSubmit();
+
+    expect(mockAuthService.register).not.toHaveBeenCalled();
+  });
+
+  it('should display server error from authService', async () => {
+    mockAuthService.register.mockImplementation(async () => {
+      mockAuthService._errorSignal.set('Cet email est déjà utilisé');
+    });
+
+    component.form = { name: 'Test', email: 'test@test.com', password: 'password123', gdprConsent: true };
+    await component.onSubmit();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Cet email est déjà utilisé');
   });
 });

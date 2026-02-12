@@ -104,5 +104,27 @@ describe('Auth (e2e)', () => {
       expect(user!.passwordHash).not.toBe('password123');
       expect(user!.passwordHash).toMatch(/^\$argon2id\$/);
     });
+
+    it('should return 429 after exceeding rate limit (AC5)', async () => {
+      // Exhaust the 10 req/min rate limit on register endpoint
+      // (previous tests already consumed some requests)
+      for (let i = 0; i < 12; i++) {
+        await request.default(app.getHttpServer())
+          .post('/api/v1/auth/register')
+          .send({ name: 'x', email: 'x', password: 'x', gdprConsent: true });
+      }
+
+      const res = await request.default(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send({
+          name: 'Rate Limited',
+          email: 'e2e-test-limited@example.com',
+          password: 'password123',
+          gdprConsent: true,
+        })
+        .expect(429);
+
+      expect(res.body.statusCode).toBe(429);
+    });
   });
 });

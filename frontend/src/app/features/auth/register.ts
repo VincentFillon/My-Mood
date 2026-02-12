@@ -2,7 +2,6 @@ import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RegisterSchema } from '@shared/schemas/auth.schema';
-import type { RegisterInput } from '@shared/schemas/auth.schema';
 import { AuthService } from '../../core/auth/auth.service';
 import type { ZodError } from 'zod';
 
@@ -132,7 +131,7 @@ interface FieldErrors {
   `,
 })
 export class RegisterComponent {
-  form: { name: string; email: string; password: string; gdprConsent: boolean } = {
+  form = {
     name: '',
     email: '',
     password: '',
@@ -142,21 +141,13 @@ export class RegisterComponent {
   private readonly authService = inject(AuthService);
   private readonly _fieldErrors = signal<FieldErrors>({});
   readonly fieldErrors = this._fieldErrors.asReadonly();
-  readonly serverError = signal<string | null>(null);
+  readonly serverError = this.authService.error;
   readonly loading = this.authService.loading;
 
   async onSubmit() {
     this._fieldErrors.set({});
-    this.serverError.set(null);
 
-    const input: RegisterInput = {
-      name: this.form.name,
-      email: this.form.email,
-      password: this.form.password,
-      gdprConsent: this.form.gdprConsent as true,
-    };
-
-    const result = RegisterSchema.safeParse(input);
+    const result = RegisterSchema.safeParse(this.form);
     if (!result.success) {
       const errors: FieldErrors = {};
       for (const issue of (result.error as ZodError).issues) {
@@ -169,10 +160,6 @@ export class RegisterComponent {
       return;
     }
 
-    try {
-      await this.authService.register(result.data);
-    } catch {
-      this.serverError.set(this.authService.error());
-    }
+    await this.authService.register(result.data);
   }
 }

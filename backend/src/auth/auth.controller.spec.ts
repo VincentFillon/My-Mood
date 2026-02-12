@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConflictException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 
@@ -16,6 +18,10 @@ describe('AuthController', () => {
       controllers: [AuthController],
       providers: [
         { provide: AuthService, useValue: authService },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('test') },
+        },
       ],
     }).compile();
 
@@ -82,6 +88,35 @@ describe('AuthController', () => {
           path: '/api/v1/auth/refresh',
         }),
       );
+    });
+
+    it('should propagate ConflictException from service', async () => {
+      authService.register!.mockRejectedValue(
+        new ConflictException({
+          statusCode: 409,
+          error: 'CONFLICT',
+          message: 'Cet email est déjà utilisé',
+          timestamp: new Date().toISOString(),
+        }),
+      );
+
+      const mockResponse = {
+        cookie: jest.fn(),
+      } as unknown as import('express').Response;
+
+      await expect(
+        controller.register(
+          {
+            name: 'Test',
+            email: 'test@example.com',
+            password: 'password123',
+            gdprConsent: true as const,
+          },
+          mockResponse,
+        ),
+      ).rejects.toThrow(ConflictException);
+
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
     });
   });
 });

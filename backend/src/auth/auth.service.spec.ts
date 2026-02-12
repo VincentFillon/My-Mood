@@ -72,7 +72,6 @@ describe('AuthService', () => {
         id: 'uuid-1',
         name: 'Existing',
         email: 'test@example.com',
-        passwordHash: 'hash',
       });
 
       await expect(service.register(validDto)).rejects.toThrow(ConflictException);

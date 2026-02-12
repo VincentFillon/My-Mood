@@ -48,18 +48,14 @@ export class AuthService {
     } catch (err: unknown) {
       const message = this.extractErrorMessage(err);
       this._error.set(message);
-      throw err;
     } finally {
       this._loading.set(false);
     }
   }
 
   private extractErrorMessage(err: unknown): string {
-    if (err && typeof err === 'object' && 'error' in err) {
-      const httpErr = err as { error: { message?: string } };
-      if (httpErr.error?.message) {
-        return httpErr.error.message;
-      }
+    if (err && typeof err === 'object' && 'message' in err) {
+      return (err as { message: string }).message;
     }
     return 'Une erreur est survenue';
   }

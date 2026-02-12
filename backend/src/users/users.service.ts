@@ -12,6 +12,17 @@ export class UsersService {
         id: true,
         name: true,
         email: true,
+      },
+    });
+  }
+
+  async findByEmailWithCredentials(email: string) {
+    return this.prisma.db.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
         passwordHash: true,
       },
     });

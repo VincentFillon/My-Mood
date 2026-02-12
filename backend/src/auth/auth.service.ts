@@ -18,6 +18,14 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterInput) {
+    // Hash password first to prevent timing side-channel on email existence
+    const passwordHash = await argon2.hash(dto.password, {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 1,
+    });
+
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
       throw new ConflictException({
@@ -27,13 +35,6 @@ export class AuthService {
         timestamp: new Date().toISOString(),
       });
     }
-
-    const passwordHash = await argon2.hash(dto.password, {
-      type: argon2.argon2id,
-      memoryCost: 65536,
-      timeCost: 3,
-      parallelism: 1,
-    });
 
     const user = await this.usersService.create({
       name: dto.name,
