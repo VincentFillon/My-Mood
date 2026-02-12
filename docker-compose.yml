@@ -22,9 +22,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production_minimum_32_characters}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_in_production_minimum_32_characters}
       NODE_ENV: ${NODE_ENV:-development}
-      API_PORT: 3000
+      API_PORT: 3070
     ports:
-      - "3000:3000"
+      - "3000:3070"
     depends_on:
       postgres:
         condition: service_healthy
@@ -34,7 +34,7 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "4200:4200"
+      - "4200:4270"
     depends_on:
       - backend
 

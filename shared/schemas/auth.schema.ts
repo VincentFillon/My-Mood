@@ -21,3 +21,14 @@ export const RegisterResponseSchema = z.object({
 });
 
 export type RegisterResponse = z.infer<typeof RegisterResponseSchema>;
+
+export const LoginSchema = z.object({
+  email: z.string().email('Format d\'email invalide'),
+  password: z.string().min(1, 'Le mot de passe est requis'),
+});
+
+export type LoginInput = z.infer<typeof LoginSchema>;
+
+export const LoginResponseSchema = RegisterResponseSchema;
+
+export type LoginResponse = z.infer<typeof LoginResponseSchema>;

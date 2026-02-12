@@ -1,12 +1,13 @@
 export type {
-  Pagination,
-  PaginationMeta,
-  ApiErrorResponse,
+  ApiErrorResponse, Pagination,
+  PaginationMeta
 } from '../schemas/common.schema';
 
 export type {
-  RegisterInput,
-  RegisterResponse,
+  LoginInput,
+  LoginResponse, RegisterInput,
+  RegisterResponse
 } from '../schemas/auth.schema';
 
 export type { ErrorCode } from '../constants/errors';
+

@@ -1,8 +1,8 @@
-import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { computed, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import type { LoginInput, LoginResponse, RegisterInput, RegisterResponse } from '@shared/schemas/auth.schema';
 import { firstValueFrom } from 'rxjs';
-import type { RegisterInput, RegisterResponse } from '@shared/schemas/auth.schema';
 
 interface UserInfo {
   id: string;
@@ -53,7 +53,77 @@ export class AuthService {
     }
   }
 
+  async login(dto: LoginInput): Promise<void> {
+    this._loading.set(true);
+    this._error.set(null);
+
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ data: LoginResponse }>('/api/v1/auth/login', dto, {
+          withCredentials: true,
+        }),
+      );
+
+      this._accessToken = response.data.accessToken;
+      this._currentUser.set(response.data.user);
+      await this.router.navigate(['/']);
+    } catch (err: unknown) {
+      const message = this.extractErrorMessage(err);
+      this._error.set(message);
+    } finally {
+      this._loading.set(false);
+    }
+  }
+
+  async refresh(): Promise<boolean> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ data: LoginResponse }>('/api/v1/auth/refresh', {}, {
+          withCredentials: true,
+        }),
+      );
+
+      this._accessToken = response.data.accessToken;
+      this._currentUser.set(response.data.user);
+      return true;
+    } catch {
+      this._accessToken = null;
+      this._currentUser.set(null);
+      return false;
+    }
+  }
+
+  async logout(): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.post('/api/v1/auth/logout', {}, {
+          withCredentials: true,
+        }),
+      );
+    } catch {
+      // Ignore logout errors — clear local state regardless
+    } finally {
+      this._accessToken = null;
+      this._currentUser.set(null);
+      await this.router.navigate(['/login']);
+    }
+  }
+
+  async tryRestoreSession(): Promise<void> {
+    try {
+      await this.refresh();
+    } catch {
+      // Silent failure — user will see login page
+    }
+  }
+
   private extractErrorMessage(err: unknown): string {
+    if (err && typeof err === 'object' && 'error' in err) {
+      const httpErr = err as { error?: { message?: string } };
+      if (httpErr.error?.message) {
+        return httpErr.error.message;
+      }
+    }
     if (err && typeof err === 'object' && 'message' in err) {
       return (err as { message: string }).message;
     }

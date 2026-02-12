@@ -1,9 +1,9 @@
 :80 {
 	handle /api/* {
-		reverse_proxy backend:3000
+		reverse_proxy backend:3070
 	}
 
 	handle {
-		reverse_proxy frontend:4200
+		reverse_proxy frontend:4270
 	}
 }
