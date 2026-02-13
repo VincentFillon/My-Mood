@@ -45,7 +45,7 @@ development_status:
   1-1-initialisation-du-projet-et-infrastructure-de-developpement: done
   1-2-inscription-utilisateur: done
   1-3-connexion-et-deconnexion: done
-  1-4-gestion-du-profil-utilisateur: backlog
+  1-4-gestion-du-profil-utilisateur: done
   epic-1-retrospective: optional
 
   # Epic 2: Creation de Groupe & Invitations

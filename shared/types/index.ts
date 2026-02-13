@@ -9,5 +9,7 @@ export type {
   RegisterResponse
 } from '../schemas/auth.schema';
 
+export type { UpdateProfileInput } from '../schemas/user.schema';
+
 export type { ErrorCode } from '../constants/errors';
 
