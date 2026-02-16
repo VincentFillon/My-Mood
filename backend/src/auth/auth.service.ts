@@ -10,7 +10,7 @@ import { ERROR_CODES } from '@shared/constants/errors.js';
 import { TOKEN_EXPIRY_REFRESH_MS } from '@shared/constants/limits.js';
 import type { LoginInput, RegisterInput } from '@shared/schemas/auth.schema.js';
 import * as argon2 from 'argon2';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UsersService } from '../users/users.service.js';
 
@@ -187,11 +187,11 @@ export class AuthService {
   }
 
   private async generateTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
+    const payload = { sub: userId, email, jti: randomUUID() };
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),
-      this.jwtService.signAsync(payload, {
+      this.jwtService.signAsync({ ...payload, jti: randomUUID() }, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
         expiresIn: `${TOKEN_EXPIRY_REFRESH_MS}ms`,
       }),

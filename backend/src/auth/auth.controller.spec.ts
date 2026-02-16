@@ -89,7 +89,7 @@ describe('AuthController', () => {
         expect.objectContaining({
           httpOnly: true,
           sameSite: 'strict',
-          path: '/api/v1/auth/refresh',
+          path: '/api/v1/auth',
         }),
       );
     });
@@ -152,7 +152,7 @@ describe('AuthController', () => {
         expect.objectContaining({
           httpOnly: true,
           sameSite: 'strict',
-          path: '/api/v1/auth/refresh',
+          path: '/api/v1/auth',
         }),
       );
     });
@@ -210,7 +210,7 @@ describe('AuthController', () => {
         expect.objectContaining({
           httpOnly: true,
           sameSite: 'strict',
-          path: '/api/v1/auth/refresh',
+          path: '/api/v1/auth',
         }),
       );
       expect(result).toEqual({ message: 'Déconnexion réussie' });

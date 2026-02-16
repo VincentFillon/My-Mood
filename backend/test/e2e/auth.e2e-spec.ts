@@ -118,34 +118,6 @@ describe('Auth (e2e)', () => {
       expect(user!.passwordHash).toMatch(/^\$argon2id\$/);
     });
 
-    it('should return 429 after exceeding rate limit (AC5)', async () => {
-      // Exhaust the 10 req/min rate limit on register endpoint
-      // (previous tests already consumed some requests)
-      for (let i = 0; i < 12; i++) {
-        await request
-          .default(app.getHttpServer())
-          .post('/api/v1/auth/register')
-          .send({
-            name: 'x',
-            email: 'x',
-            password: 'x',
-            gdprConsent: true,
-          });
-      }
-
-      const res = await request
-        .default(app.getHttpServer())
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'Rate Limited',
-          email: 'e2e-test-limited@example.com',
-          password: 'password123',
-          gdprConsent: true,
-        })
-        .expect(429);
-
-      expect(res.body.statusCode).toBe(429);
-    });
   });
 
   describe('POST /api/v1/auth/login', () => {
@@ -293,6 +265,38 @@ describe('Auth (e2e)', () => {
         .post('/api/v1/auth/refresh')
         .set('Cookie', [`refresh_token=${logoutCookieValue}`])
         .expect(401);
+    });
+  });
+
+  // ⚠️ WARNING: This describe block MUST remain the LAST block in this file.
+  // It exhausts the throttler, which would cause subsequent register calls
+  // (in beforeAll blocks of other describe blocks) to silently fail with 429.
+  describe('Rate limiting (must run last)', () => {
+    it('should return 429 after exceeding rate limit on register (AC5)', async () => {
+      for (let i = 0; i < 12; i++) {
+        await request
+          .default(app.getHttpServer())
+          .post('/api/v1/auth/register')
+          .send({
+            name: 'x',
+            email: 'x',
+            password: 'x',
+            gdprConsent: true,
+          });
+      }
+
+      const res = await request
+        .default(app.getHttpServer())
+        .post('/api/v1/auth/register')
+        .send({
+          name: 'Rate Limited',
+          email: 'e2e-test-limited@example.com',
+          password: 'password123',
+          gdprConsent: true,
+        })
+        .expect(429);
+
+      expect(res.body.statusCode).toBe(429);
     });
   });
 });

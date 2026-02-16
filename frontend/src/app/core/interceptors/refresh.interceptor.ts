@@ -51,10 +51,8 @@ export const refreshInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>,
               });
               return next(newReq);
             }
-            // Refresh failed — logout and propagate error
-            return from(authService.logout()).pipe(
-              switchMap(() => throwError(() => error)),
-            );
+            // Refresh failed — let catchError handle logout
+            return throwError(() => error);
           }),
           catchError(() => {
             return from(authService.logout()).pipe(
