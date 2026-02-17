@@ -50,9 +50,7 @@ describe('RegisterComponent', () => {
   it('should render registration form', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Rejoins My Mood');
-    expect(compiled.querySelector('input[name="name"]')).toBeTruthy();
-    expect(compiled.querySelector('input[name="email"]')).toBeTruthy();
-    expect(compiled.querySelector('input[name="password"]')).toBeTruthy();
+    expect(compiled.querySelectorAll('app-input').length).toBe(3);
     expect(compiled.querySelector('input[name="gdprConsent"]')).toBeTruthy();
   });
 
@@ -92,13 +90,13 @@ describe('RegisterComponent', () => {
     expect(component.fieldErrors().gdprConsent).toBeDefined();
   });
 
-  it('should display error messages in French', async () => {
+  it('should display field error messages', async () => {
     component.form = { name: '', email: 'bad', password: '123', gdprConsent: false };
     await component.onSubmit();
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const errorElements = compiled.querySelectorAll('.text-\\[\\#F44336\\]');
+    const errorElements = compiled.querySelectorAll('.field-error, .input-error');
     expect(errorElements.length).toBeGreaterThan(0);
   });
 

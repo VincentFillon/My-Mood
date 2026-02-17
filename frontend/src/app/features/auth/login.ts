@@ -1,9 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LoginSchema } from '@shared/schemas/auth.schema';
 import type { ZodError } from 'zod';
 import { AuthService } from '../../core/auth/auth.service';
+import { ToastService } from '../../core/services/toast.service';
+import { CardComponent } from '../../shared/ui/card/card';
+import { InputComponent } from '../../shared/ui/input/input';
+import { ButtonComponent } from '../../shared/ui/button/button';
 
 interface FieldErrors {
   email?: string;
@@ -12,82 +16,121 @@ interface FieldErrors {
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, CardComponent, InputComponent, ButtonComponent],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-[#0f0f0f] px-4">
-      <div class="w-full max-w-[400px] rounded-2xl bg-[#1a1a1a] p-8 max-sm:rounded-none max-sm:p-4">
-        <h1 class="mb-6 text-center text-2xl font-bold text-white">
-          Connecte-toi à My Mood
-        </h1>
+    <div class="auth-container">
+      <app-card class="auth-card">
+        <h1 class="auth-title">Connecte-toi</h1>
 
-        <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-          <!-- Email -->
-          <div>
-            <label for="email" class="mb-1 block text-sm text-[#a0a0a0]">Email</label>
-            <input
-              id="email"
-              type="email"
-              [(ngModel)]="form.email"
-              name="email"
-              autocomplete="email"
-              class="h-11 w-full rounded-lg border border-[#2a2a2a] bg-[#242424] px-3 text-white placeholder-[#666] focus:border-[#6c63ff] focus:outline-none focus:ring-1 focus:ring-[#6c63ff]/50"
-              [class.border-[#F44336]]="fieldErrors().email"
-              [attr.aria-invalid]="fieldErrors().email ? 'true' : null"
-              [attr.aria-describedby]="fieldErrors().email ? 'email-error' : null"
-              placeholder="ton@email.com"
-            />
-            @if (fieldErrors().email) {
-              <p id="email-error" class="mt-1 text-xs text-[#F44336]">{{ fieldErrors().email }}</p>
-            }
-          </div>
+        <form (ngSubmit)="onSubmit()" class="auth-form">
+          <app-input
+            label="Email"
+            type="email"
+            [(ngModel)]="form.email"
+            name="email"
+            autocomplete="email"
+            [error]="fieldErrors().email ?? ''"
+            placeholder="ton@email.com"
+          />
 
-          <!-- Password -->
-          <div>
-            <label for="password" class="mb-1 block text-sm text-[#a0a0a0]">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              [(ngModel)]="form.password"
-              name="password"
-              autocomplete="current-password"
-              class="h-11 w-full rounded-lg border border-[#2a2a2a] bg-[#242424] px-3 text-white placeholder-[#666] focus:border-[#6c63ff] focus:outline-none focus:ring-1 focus:ring-[#6c63ff]/50"
-              [class.border-[#F44336]]="fieldErrors().password"
-              [attr.aria-invalid]="fieldErrors().password ? 'true' : null"
-              [attr.aria-describedby]="fieldErrors().password ? 'password-error' : null"
-              placeholder="Ton mot de passe"
-            />
-            @if (fieldErrors().password) {
-              <p id="password-error" class="mt-1 text-xs text-[#F44336]">{{ fieldErrors().password }}</p>
-            }
-          </div>
+          <app-input
+            label="Mot de passe"
+            type="password"
+            [(ngModel)]="form.password"
+            name="password"
+            autocomplete="current-password"
+            [error]="fieldErrors().password ?? ''"
+            placeholder="Ton mot de passe"
+          />
 
-          <!-- Server error -->
-          @if (serverError()) {
-            <div class="text-center text-sm text-[#F44336]">
-              {{ serverError() }}
-            </div>
-          }
-
-          <!-- Submit -->
-          <button
-            type="submit"
-            [disabled]="loading()"
-            class="mt-2 h-11 w-full rounded-lg bg-[#6c63ff] font-medium text-white transition-colors hover:bg-[#5a52d5] disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <app-button variant="primary" type="submit" [disabled]="loading()" class="submit-btn">
             @if (loading()) {
-              <span class="inline-block h-5 w-5 animate-pulse rounded bg-white/20"></span>
+              <span class="loading-indicator"></span>
             } @else {
               Se connecter
             }
-          </button>
+          </app-button>
         </form>
 
-        <p class="mt-6 text-center text-sm text-[#a0a0a0]">
+        <div class="auth-link">
           Pas encore de compte ?
-          <a routerLink="/register" class="text-[#6c63ff] hover:underline">Inscris-toi</a>
-        </p>
-      </div>
+          <app-button variant="ghost" routerLink="/register" size="sm">Rejoins-nous</app-button>
+        </div>
+      </app-card>
     </div>
+  `,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--surface-0);
+      padding: var(--space-4);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-title {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 var(--space-6) 0;
+      text-align: center;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      margin-top: var(--space-2);
+    }
+
+    .submit-btn button {
+      width: 100%;
+    }
+
+    .loading-indicator {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-md);
+      background-color: color-mix(in srgb, currentColor 20%, transparent);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loading-indicator {
+        animation: none;
+      }
+    }
+
+    .auth-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1);
+      margin-top: var(--space-6);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
   `,
 })
 export class LoginComponent {
@@ -97,10 +140,20 @@ export class LoginComponent {
   };
 
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly _fieldErrors = signal<FieldErrors>({});
   readonly fieldErrors = this._fieldErrors.asReadonly();
   readonly serverError = this.authService.error;
   readonly loading = this.authService.loading;
+
+  constructor() {
+    effect(() => {
+      const err = this.serverError();
+      if (err) {
+        this.toastService.error(err);
+      }
+    });
+  }
 
   async onSubmit() {
     this._fieldErrors.set({});

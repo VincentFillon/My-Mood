@@ -33,6 +33,7 @@ describe('ProfileEditorComponent', () => {
 
     fixture = TestBed.createComponent(ProfileEditorComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('userName', 'Jean Dupont');
     fixture.detectChanges();
   });
 
@@ -40,12 +41,9 @@ describe('ProfileEditorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should show initials when no avatar', () => {
-    fixture.componentRef.setInput('initials', 'JD');
-    fixture.detectChanges();
-
+  it('should render avatar component', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.avatar-initials')?.textContent?.trim()).toBe('JD');
+    expect(compiled.querySelector('app-avatar')).toBeTruthy();
   });
 
   it('should reject files over 10MB', () => {

@@ -1,182 +1,201 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UpdateProfileSchema } from '@shared/schemas/user.schema';
-import { NotificationService } from '../../core/services/notification.service';
+import { ToastService } from '../../core/services/toast.service';
+import { ModalService } from '../../core/services/modal.service';
 import {
   UserProfile,
   UserService,
 } from '../../core/services/user.service';
 import { ProfileEditorComponent } from './profile-editor';
+import { CardComponent } from '../../shared/ui/card/card';
+import { InputComponent } from '../../shared/ui/input/input';
+import { ButtonComponent } from '../../shared/ui/button/button';
 
 @Component({
   selector: 'app-account-page',
   standalone: true,
-  imports: [FormsModule, ProfileEditorComponent],
+  imports: [FormsModule, ProfileEditorComponent, CardComponent, InputComponent, ButtonComponent],
   template: `
     <div class="account-page">
-      <h1>Mon Compte</h1>
+      <h1 class="page-title">Mon compte</h1>
 
       @if (loading()) {
-        <!-- Skeleton screens -->
         <div class="skeleton-container">
           <div class="skeleton skeleton-avatar"></div>
           <div class="skeleton skeleton-line"></div>
           <div class="skeleton skeleton-line"></div>
         </div>
+      } @else if (loadError()) {
+        <app-card class="section">
+          <p class="error-text">Impossible de charger le profil. Réessaie plus tard.</p>
+        </app-card>
       } @else if (profile()) {
-        <app-profile-editor
-          [avatarUrl]="profile()!.avatarUrl"
-          [initials]="initials()"
-          (avatarChanged)="onAvatarChanged($event)"
-        />
+        <!-- Section Profil -->
+        <app-card class="section">
+          <h2 class="section-title">Profil</h2>
 
-        <form class="profile-form" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label for="name">Nom</label>
-            <input
-              id="name"
+          <div class="avatar-section">
+            <app-profile-editor
+              [avatarUrl]="profile()!.avatarUrl"
+              [userName]="profile()!.name"
+              (avatarChanged)="onAvatarChanged($event)"
+            />
+          </div>
+
+          <form class="profile-form" (ngSubmit)="onSubmit()">
+            <app-input
+              label="Nom"
               type="text"
               [(ngModel)]="name"
               name="name"
               autocomplete="name"
+              [error]="nameError() ?? ''"
             />
-            @if (nameError()) {
-              <p class="error-inline" role="alert">{{ nameError() }}</p>
-            }
-          </div>
 
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              id="email"
+            <app-input
+              label="Email"
               type="email"
               [(ngModel)]="email"
               name="email"
               autocomplete="email"
+              [error]="emailError() ?? ''"
             />
-            @if (emailError()) {
-              <p class="error-inline" role="alert">{{ emailError() }}</p>
-            }
-          </div>
 
-          <button type="submit" [disabled]="submitting()">
-            {{ submitting() ? 'Enregistrement...' : 'Enregistrer' }}
-          </button>
-        </form>
-      }
+            <div class="form-actions">
+              <app-button variant="primary" type="submit" [disabled]="submitting()">
+                {{ submitting() ? 'Enregistrement...' : 'Enregistrer' }}
+              </app-button>
+            </div>
+          </form>
+        </app-card>
 
-      @if (notification.notification(); as notif) {
-        <div class="toast" [class]="'toast-' + notif.type" role="status">
-          {{ notif.message }}
-        </div>
+        <!-- Section Sécurité -->
+        <app-card class="section">
+          <h2 class="section-title">Sécurité</h2>
+          <app-button variant="secondary">Changer mon mot de passe</app-button>
+        </app-card>
+
+        <!-- Section Zone Danger -->
+        <app-card class="section danger-card">
+          <h2 class="section-title danger-title">Zone danger</h2>
+          <p class="danger-text">La suppression de ton compte est irréversible. Toutes tes données seront définitivement effacées.</p>
+          <app-button variant="danger" (click)="onDeleteAccount()">Supprimer mon compte</app-button>
+        </app-card>
       }
     </div>
   `,
   styles: `
-    .account-page {
-      max-width: 480px;
-      margin: 2rem auto;
-      padding: 0 1rem;
+    :host {
+      display: block;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: var(--space-6);
     }
-    h1 {
-      font-size: 1.5rem;
+
+    @media (max-width: 639px) {
+      :host {
+        padding: var(--space-4);
+      }
+    }
+
+    .page-title {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 var(--space-6) 0;
+    }
+
+    .section {
+      margin-bottom: var(--space-4);
+    }
+
+    .section-title {
+      font-size: var(--text-lg);
       font-weight: 600;
-      margin-bottom: 1.5rem;
+      color: var(--text-primary);
+      margin: 0 0 var(--space-4) 0;
     }
+
     .skeleton-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1rem;
+      gap: var(--space-4);
     }
+
     .skeleton {
-      background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+      background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
-      border-radius: 0.375rem;
+      border-radius: var(--radius-md);
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .skeleton {
+        animation: none;
+      }
+    }
+
     .skeleton-avatar {
       width: 96px;
       height: 96px;
       border-radius: 50%;
     }
+
     .skeleton-line {
       width: 100%;
-      height: 2.5rem;
+      height: 44px;
     }
+
     @keyframes shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
+
+    .avatar-section {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--space-4);
+    }
+
     .profile-form {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      margin-top: 1.5rem;
+      gap: var(--space-4);
     }
-    .form-group {
+
+    .form-actions {
       display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      justify-content: flex-start;
     }
-    label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #334155;
+
+    .danger-card {
+      border: 1px solid var(--error);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
     }
-    input {
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 0.375rem;
-      font-size: 1rem;
-    }
-    input:focus {
-      outline: 2px solid #3b82f6;
-      outline-offset: -1px;
-      border-color: #3b82f6;
-    }
-    button[type='submit'] {
-      padding: 0.625rem 1.25rem;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 0.375rem;
-      font-size: 1rem;
-      cursor: pointer;
-      align-self: flex-start;
-    }
-    button[type='submit']:hover:not(:disabled) {
-      background: #2563eb;
-    }
-    button[type='submit']:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .error-inline {
-      color: #dc2626;
-      font-size: 0.875rem;
+
+    .error-text {
+      color: var(--error);
+      font-size: var(--text-sm);
       margin: 0;
     }
-    .toast {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      padding: 0.75rem 1.25rem;
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-      color: white;
-      z-index: 1000;
+
+    .danger-title {
+      color: var(--error) !important;
     }
-    .toast-success {
-      background: #16a34a;
-    }
-    .toast-error {
-      background: #dc2626;
+
+    .danger-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      margin: 0 0 var(--space-4) 0;
     }
   `,
 })
 export class AccountPageComponent implements OnInit {
   readonly loading = signal(true);
+  readonly loadError = signal(false);
   readonly submitting = signal(false);
   readonly profile = signal<UserProfile | null>(null);
   readonly nameError = signal<string | null>(null);
@@ -185,21 +204,9 @@ export class AccountPageComponent implements OnInit {
   name = '';
   email = '';
 
-  readonly initials = computed(() => {
-    const p = this.profile();
-    if (!p?.name) return '';
-    return p.name
-      .split(' ')
-      .map((w) => w[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  });
-
-  constructor(
-    private readonly userService: UserService,
-    readonly notification: NotificationService,
-  ) {}
+  private readonly userService = inject(UserService);
+  private readonly toastService = inject(ToastService);
+  private readonly modalService = inject(ModalService);
 
   ngOnInit(): void {
     this.loadProfile();
@@ -210,7 +217,7 @@ export class AccountPageComponent implements OnInit {
     if (current) {
       this.profile.set({ ...current, avatarUrl });
     }
-    this.notification.success('Photo de profil mise à jour');
+    this.toastService.success('Photo de profil mise à jour');
   }
 
   onSubmit(): void {
@@ -241,7 +248,7 @@ export class AccountPageComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.profile.set(response.data);
-          this.notification.success('Profil mis à jour');
+          this.toastService.success('Profil mis à jour');
           this.submitting.set(false);
         },
         error: (err: unknown) => {
@@ -249,10 +256,22 @@ export class AccountPageComponent implements OnInit {
           if (this.isHttpError(err, 409)) {
             this.emailError.set('Cet email est déjà utilisé');
           } else {
-            this.notification.error('Erreur lors de la mise à jour du profil');
+            this.toastService.error('Erreur lors de la mise à jour du profil');
           }
         },
       });
+  }
+
+  onDeleteAccount(): void {
+    this.modalService.confirm(
+      'Supprimer mon compte ?',
+      'Cette action est irréversible. Toutes tes données seront définitivement supprimées.',
+      'Supprimer',
+    ).subscribe((confirmed) => {
+      if (confirmed) {
+        this.toastService.info('Suppression du compte non encore implémentée');
+      }
+    });
   }
 
   private loadProfile(): void {
@@ -265,6 +284,8 @@ export class AccountPageComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.loadError.set(true);
+        this.toastService.error('Impossible de charger le profil');
       },
     });
   }

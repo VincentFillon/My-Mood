@@ -52,7 +52,7 @@ development_status:
   epic-1-5: in-progress
   1-5-1-fix-tsc-alias-et-stabilisation-infra-dev: done
   1-5-2-design-tokens-tailwind-et-composants-de-base: done
-  1-5-3-styling-pages-existantes-et-navigation-header: ready-for-dev
+  1-5-3-styling-pages-existantes-et-navigation-header: done
   epic-1-5-retrospective: optional
 
   # Epic 2: Creation de Groupe & Invitations

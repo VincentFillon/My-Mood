@@ -4,6 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService } from '../../core/auth/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { LoginComponent } from './login';
 
 function createMockAuthService() {
@@ -29,6 +30,7 @@ describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let mockAuthService: ReturnType<typeof createMockAuthService>;
+  let toastService: ToastService;
 
   beforeEach(async () => {
     mockAuthService = createMockAuthService();
@@ -42,6 +44,7 @@ describe('LoginComponent', () => {
       ],
     }).compileComponents();
 
+    toastService = TestBed.inject(ToastService);
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -53,9 +56,8 @@ describe('LoginComponent', () => {
 
   it('should render login form', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Connecte-toi à My Mood');
-    expect(compiled.querySelector('input[name="email"]')).toBeTruthy();
-    expect(compiled.querySelector('input[name="password"]')).toBeTruthy();
+    expect(compiled.querySelector('h1')?.textContent).toContain('Connecte-toi');
+    expect(compiled.querySelectorAll('app-input').length).toBe(2);
   });
 
   it('should show validation errors for empty fields', async () => {
@@ -93,7 +95,7 @@ describe('LoginComponent', () => {
     expect(mockAuthService.login).not.toHaveBeenCalled();
   });
 
-  it('should display server error from authService', async () => {
+  it('should show server error via ToastService', async () => {
     mockAuthService.login.mockImplementation(async () => {
       mockAuthService._errorSignal.set('Email ou mot de passe incorrect');
     });
@@ -102,14 +104,15 @@ describe('LoginComponent', () => {
     await component.onSubmit();
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.textContent).toContain('Email ou mot de passe incorrect');
+    const toasts = toastService.toasts();
+    expect(toasts.length).toBeGreaterThan(0);
+    expect(toasts.some(t => t.message === 'Email ou mot de passe incorrect' && t.variant === 'error')).toBe(true);
   });
 
-  it('should have link to register page', () => {
+  it('should have ghost button link to register page', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const link = compiled.querySelector('a[href="/register"]');
-    expect(link).toBeTruthy();
-    expect(link?.textContent).toContain('Inscris-toi');
+    const authLink = compiled.querySelector('.auth-link app-button');
+    expect(authLink).toBeTruthy();
+    expect(authLink?.textContent).toContain('Rejoins-nous');
   });
 });

@@ -1,6 +1,8 @@
 import { HttpEventType } from '@angular/common/http';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { UserService } from '../../core/services/user.service';
+import { AvatarComponent } from '../../shared/ui/avatar/avatar';
+import { ButtonComponent } from '../../shared/ui/button/button';
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
@@ -8,18 +10,19 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
 @Component({
   selector: 'app-profile-editor',
   standalone: true,
+  imports: [AvatarComponent, ButtonComponent],
   template: `
     <div class="profile-editor">
       <div class="avatar-container">
-        @if (avatarUrl()) {
-          <img [src]="avatarUrl()" alt="Photo de profil" class="avatar" />
-        } @else {
-          <div class="avatar avatar-initials">{{ initials() }}</div>
-        }
+        <app-avatar
+          [name]="userName()"
+          [src]="avatarUrl()"
+          size="xl"
+        />
 
-        <button type="button" class="btn-change-photo" (click)="fileInput.click()">
-          Changer la photo
-        </button>
+        <app-button variant="secondary" size="sm" (click)="fileInput.click()">
+          Changer ma photo
+        </app-button>
         <input
           #fileInput
           type="file"
@@ -36,7 +39,7 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
       }
 
       @if (errorMessage()) {
-        <p class="error-inline" role="alert">{{ errorMessage() }}</p>
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
       }
     </div>
   `,
@@ -45,41 +48,16 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
+      gap: var(--space-3);
     }
+
     .avatar-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      gap: var(--space-2);
     }
-    .avatar {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #e2e8f0;
-    }
-    .avatar-initials {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      font-weight: 600;
-      color: #475569;
-    }
-    .btn-change-photo {
-      background: none;
-      border: 1px solid #cbd5e1;
-      border-radius: 0.375rem;
-      padding: 0.375rem 0.75rem;
-      font-size: 0.875rem;
-      cursor: pointer;
-      color: #334155;
-    }
-    .btn-change-photo:hover {
-      background: #f1f5f9;
-    }
+
     .sr-only {
       position: absolute;
       width: 1px;
@@ -90,39 +68,44 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
       clip: rect(0, 0, 0, 0);
       border: 0;
     }
+
     .progress-bar {
       width: 100%;
       max-width: 200px;
       height: 4px;
-      background: #e2e8f0;
+      background: var(--surface-3);
       border-radius: 2px;
       overflow: hidden;
     }
+
     .progress-fill {
       height: 100%;
-      background: #3b82f6;
+      background: var(--accent-primary);
       transition: width 0.2s;
     }
-    .error-inline {
-      color: #dc2626;
-      font-size: 0.875rem;
+
+    @media (prefers-reduced-motion: reduce) {
+      .progress-fill {
+        transition: none;
+      }
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: var(--text-sm);
       margin: 0;
     }
   `,
 })
 export class ProfileEditorComponent {
   readonly avatarUrl = input<string | null>(null);
-  readonly initials = input<string>('');
+  readonly userName = input<string>('');
   readonly avatarChanged = output<string>();
 
   readonly uploadProgress = signal(0);
   readonly errorMessage = signal<string | null>(null);
 
-  private readonly userService: UserService;
-
-  constructor(userService: UserService) {
-    this.userService = userService;
-  }
+  private readonly userService = inject(UserService);
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

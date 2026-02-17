@@ -1,10 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
-import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { NotificationService } from '../../core/services/notification.service';
+import { ToastService } from '../../core/services/toast.service';
 import { UserService } from '../../core/services/user.service';
 import { AccountPageComponent } from './account-page';
 
@@ -23,25 +22,14 @@ function createMockUserService() {
   };
 }
 
-function createMockNotificationService() {
-  const notificationSignal = signal<{ message: string; type: string } | null>(null);
-  return {
-    success: vi.fn(),
-    error: vi.fn(),
-    dismiss: vi.fn(),
-    notification: notificationSignal.asReadonly(),
-  };
-}
-
 describe('AccountPageComponent', () => {
   let component: AccountPageComponent;
   let fixture: ComponentFixture<AccountPageComponent>;
   let mockUserService: ReturnType<typeof createMockUserService>;
-  let mockNotification: ReturnType<typeof createMockNotificationService>;
+  let toastService: ToastService;
 
   beforeEach(async () => {
     mockUserService = createMockUserService();
-    mockNotification = createMockNotificationService();
 
     await TestBed.configureTestingModule({
       imports: [AccountPageComponent],
@@ -49,10 +37,10 @@ describe('AccountPageComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         { provide: UserService, useValue: mockUserService },
-        { provide: NotificationService, useValue: mockNotification },
       ],
     }).compileComponents();
 
+    toastService = TestBed.inject(ToastService);
     fixture = TestBed.createComponent(AccountPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -63,7 +51,6 @@ describe('AccountPageComponent', () => {
   });
 
   it('should show skeleton while loading', async () => {
-    // Reset to loading state
     component.loading.set(true);
     fixture.detectChanges();
 
@@ -73,15 +60,29 @@ describe('AccountPageComponent', () => {
   });
 
   it('should display profile data after loading', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
     expect(component.loading()).toBe(false);
     expect(component.name).toBe('Jean Dupont');
     expect(component.email).toBe('jean@example.com');
-    expect(compiled.querySelector('input[name="name"]')).toBeTruthy();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('app-input').length).toBe(2);
   });
 
-  it('should compute initials from name', () => {
-    expect(component.initials()).toBe('JD');
+  it('should show error state when profile loading fails', () => {
+    mockUserService.getProfile.mockReturnValue(
+      throwError(() => new Error('Network error')),
+    );
+
+    // Recreate the component to trigger ngOnInit with the failing service
+    const errorFixture = TestBed.createComponent(AccountPageComponent);
+    errorFixture.detectChanges();
+
+    const errorComponent = errorFixture.componentInstance;
+    expect(errorComponent.loadError()).toBe(true);
+    expect(errorComponent.loading()).toBe(false);
+
+    const compiled = errorFixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.error-text')).toBeTruthy();
   });
 
   it('should call updateProfile on valid submit', () => {
@@ -100,7 +101,8 @@ describe('AccountPageComponent', () => {
     component.email = 'test@example.com';
     component.onSubmit();
 
-    expect(mockNotification.success).toHaveBeenCalledWith('Profil mis à jour');
+    const toasts = toastService.toasts();
+    expect(toasts.some(t => t.message === 'Profil mis à jour' && t.variant === 'success')).toBe(true);
   });
 
   it('should show validation errors for invalid data', () => {

@@ -3,6 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RegisterSchema } from '@shared/schemas/auth.schema';
 import { AuthService } from '../../core/auth/auth.service';
+import { CardComponent } from '../../shared/ui/card/card';
+import { InputComponent } from '../../shared/ui/input/input';
+import { ButtonComponent } from '../../shared/ui/button/button';
 import type { ZodError } from 'zod';
 
 interface FieldErrors {
@@ -14,120 +17,196 @@ interface FieldErrors {
 
 @Component({
   selector: 'app-register',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, CardComponent, InputComponent, ButtonComponent],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-[#0f0f0f] px-4">
-      <div class="w-full max-w-[400px] rounded-2xl bg-[#1a1a1a] p-8 max-sm:rounded-none max-sm:p-4">
-        <h1 class="mb-6 text-center text-2xl font-bold text-white">
-          Rejoins My Mood
-        </h1>
+    <div class="auth-container">
+      <app-card class="auth-card">
+        <h1 class="auth-title">Rejoins My Mood</h1>
 
-        <form (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-          <!-- Name -->
-          <div>
-            <label for="name" class="mb-1 block text-sm text-[#a0a0a0]">Nom</label>
-            <input
-              id="name"
-              type="text"
-              [(ngModel)]="form.name"
-              name="name"
-              autocomplete="name"
-              class="h-11 w-full rounded-lg border border-[#2a2a2a] bg-[#242424] px-3 text-white placeholder-[#666] focus:border-[#6c63ff] focus:outline-none focus:ring-1 focus:ring-[#6c63ff]/50"
-              [class.border-[#F44336]]="fieldErrors().name"
-              [attr.aria-invalid]="fieldErrors().name ? 'true' : null"
-              [attr.aria-describedby]="fieldErrors().name ? 'name-error' : null"
-              placeholder="Ton nom"
-            />
-            @if (fieldErrors().name) {
-              <p id="name-error" class="mt-1 text-xs text-[#F44336]">{{ fieldErrors().name }}</p>
-            }
-          </div>
+        <form (ngSubmit)="onSubmit()" class="auth-form">
+          <app-input
+            label="Nom"
+            type="text"
+            [(ngModel)]="form.name"
+            name="name"
+            autocomplete="name"
+            [error]="fieldErrors().name ?? ''"
+            placeholder="Ton nom"
+          />
 
-          <!-- Email -->
-          <div>
-            <label for="email" class="mb-1 block text-sm text-[#a0a0a0]">Email</label>
-            <input
-              id="email"
-              type="email"
-              [(ngModel)]="form.email"
-              name="email"
-              autocomplete="email"
-              class="h-11 w-full rounded-lg border border-[#2a2a2a] bg-[#242424] px-3 text-white placeholder-[#666] focus:border-[#6c63ff] focus:outline-none focus:ring-1 focus:ring-[#6c63ff]/50"
-              [class.border-[#F44336]]="fieldErrors().email"
-              [attr.aria-invalid]="fieldErrors().email ? 'true' : null"
-              [attr.aria-describedby]="fieldErrors().email ? 'email-error' : null"
-              placeholder="ton@email.com"
-            />
-            @if (fieldErrors().email) {
-              <p id="email-error" class="mt-1 text-xs text-[#F44336]">{{ fieldErrors().email }}</p>
-            }
-          </div>
+          <app-input
+            label="Email"
+            type="email"
+            [(ngModel)]="form.email"
+            name="email"
+            autocomplete="email"
+            [error]="fieldErrors().email ?? ''"
+            placeholder="ton@email.com"
+          />
 
-          <!-- Password -->
-          <div>
-            <label for="password" class="mb-1 block text-sm text-[#a0a0a0]">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              [(ngModel)]="form.password"
-              name="password"
-              autocomplete="new-password"
-              class="h-11 w-full rounded-lg border border-[#2a2a2a] bg-[#242424] px-3 text-white placeholder-[#666] focus:border-[#6c63ff] focus:outline-none focus:ring-1 focus:ring-[#6c63ff]/50"
-              [class.border-[#F44336]]="fieldErrors().password"
-              [attr.aria-invalid]="fieldErrors().password ? 'true' : null"
-              [attr.aria-describedby]="fieldErrors().password ? 'password-error' : null"
-              placeholder="Minimum 8 caractères"
-            />
-            @if (fieldErrors().password) {
-              <p id="password-error" class="mt-1 text-xs text-[#F44336]">{{ fieldErrors().password }}</p>
-            }
-          </div>
+          <app-input
+            label="Mot de passe"
+            type="password"
+            [(ngModel)]="form.password"
+            name="password"
+            autocomplete="new-password"
+            [error]="fieldErrors().password ?? ''"
+            placeholder="Minimum 8 caractères"
+          />
 
           <!-- GDPR Consent -->
-          <div>
-            <label class="flex min-h-[44px] cursor-pointer items-center gap-3">
+          <div class="gdpr-field">
+            <label class="gdpr-label">
               <input
                 type="checkbox"
                 [(ngModel)]="form.gdprConsent"
                 name="gdprConsent"
-                class="h-5 w-5 rounded border-[#2a2a2a] bg-[#242424] text-[#6c63ff] focus:ring-[#6c63ff]"
+                class="gdpr-checkbox"
+                [attr.aria-describedby]="fieldErrors().gdprConsent ? 'gdpr-error' : null"
+                [attr.aria-invalid]="fieldErrors().gdprConsent ? true : null"
               />
-              <span class="text-sm text-[#a0a0a0]">
+              <span class="gdpr-text">
                 J'accepte les conditions d'utilisation et la politique de confidentialité
               </span>
             </label>
             @if (fieldErrors().gdprConsent) {
-              <p class="mt-1 text-xs text-[#F44336]">{{ fieldErrors().gdprConsent }}</p>
+              <p id="gdpr-error" class="field-error" role="alert">{{ fieldErrors().gdprConsent }}</p>
             }
           </div>
 
           <!-- Server error -->
           @if (serverError()) {
-            <div class="rounded-lg bg-[#F44336]/10 p-3 text-sm text-[#F44336]">
-              {{ serverError() }}
-            </div>
+            <div class="server-error">{{ serverError() }}</div>
           }
 
           <!-- Submit -->
-          <button
-            type="submit"
-            [disabled]="loading()"
-            class="mt-2 h-11 w-full rounded-lg bg-[#6c63ff] font-medium text-white transition-colors hover:bg-[#5a52d5] disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <app-button variant="primary" type="submit" [disabled]="loading()" class="submit-btn">
             @if (loading()) {
-              <span class="inline-block h-5 w-5 animate-pulse rounded bg-white/20"></span>
+              <span class="loading-indicator"></span>
             } @else {
               Créer mon compte
             }
-          </button>
+          </app-button>
         </form>
 
-        <p class="mt-6 text-center text-sm text-[#a0a0a0]">
+        <div class="auth-link">
           Déjà un compte ?
-          <a routerLink="/login" class="text-[#6c63ff] hover:underline">Connecte-toi</a>
-        </p>
-      </div>
+          <app-button variant="ghost" routerLink="/login" size="sm">Connecte-toi</app-button>
+        </div>
+      </app-card>
     </div>
+  `,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--surface-0);
+      padding: var(--space-4);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .auth-title {
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 var(--space-6) 0;
+      text-align: center;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .gdpr-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gdpr-label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-height: 44px;
+      cursor: pointer;
+    }
+
+    .gdpr-checkbox {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      accent-color: var(--accent-primary);
+    }
+
+    .gdpr-text {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .field-error {
+      font-size: var(--text-xs);
+      color: var(--error);
+      margin: var(--space-1) 0 0 0;
+    }
+
+    .server-error {
+      border-radius: var(--radius-md);
+      background-color: color-mix(in srgb, var(--error) 10%, transparent);
+      padding: var(--space-3);
+      font-size: var(--text-sm);
+      color: var(--error);
+    }
+
+    .submit-btn {
+      display: block;
+      width: 100%;
+      margin-top: var(--space-2);
+    }
+
+    .submit-btn button {
+      width: 100%;
+    }
+
+    .loading-indicator {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-md);
+      background-color: color-mix(in srgb, currentColor 20%, transparent);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loading-indicator {
+        animation: none;
+      }
+    }
+
+    .auth-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1);
+      margin-top: var(--space-6);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
   `,
 })
 export class RegisterComponent {
