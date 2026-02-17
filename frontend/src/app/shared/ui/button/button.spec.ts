@@ -124,4 +124,25 @@ describe('ButtonComponent', () => {
     const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
     expect(button.tagName.toLowerCase()).toBe('button');
   });
+
+  it('should not set aria-label by default', () => {
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should set aria-label when ariaLabel is provided', () => {
+    fixture.componentRef.setInput('ariaLabel', 'Close menu');
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.getAttribute('aria-label')).toBe('Close menu');
+  });
+
+  it('should support aria-label on icon-only variant', () => {
+    fixture.componentRef.setInput('variant', 'icon-only');
+    fixture.componentRef.setInput('ariaLabel', 'Settings');
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(button.classList.contains('btn-icon-only')).toBe(true);
+    expect(button.getAttribute('aria-label')).toBe('Settings');
+  });
 });

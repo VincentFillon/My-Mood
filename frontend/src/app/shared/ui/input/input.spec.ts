@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InputComponent } from './input';
 
 describe('InputComponent', () => {
@@ -117,5 +117,38 @@ describe('InputComponent', () => {
     fixture.detectChanges();
     const errorEl = fixture.nativeElement.querySelector('.input-error');
     expect(errorEl.getAttribute('role')).toBe('alert');
+  });
+
+  describe('ControlValueAccessor', () => {
+    it('should update value via writeValue', () => {
+      component.writeValue('hello');
+      fixture.detectChanges();
+      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+      expect(input.value).toBe('hello');
+    });
+
+    it('should call onChange when user types', () => {
+      const onChangeSpy = vi.fn();
+      component.registerOnChange(onChangeSpy);
+      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+      input.value = 'test';
+      input.dispatchEvent(new Event('input'));
+      expect(onChangeSpy).toHaveBeenCalledWith('test');
+    });
+
+    it('should call onTouched when input loses focus', () => {
+      const onTouchedSpy = vi.fn();
+      component.registerOnTouched(onTouchedSpy);
+      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+      input.dispatchEvent(new Event('blur'));
+      expect(onTouchedSpy).toHaveBeenCalled();
+    });
+
+    it('should disable input via setDisabledState', () => {
+      component.setDisabledState(true);
+      fixture.detectChanges();
+      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
+      expect(input.disabled).toBe(true);
+    });
   });
 });

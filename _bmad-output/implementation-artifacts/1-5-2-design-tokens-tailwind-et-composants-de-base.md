@@ -1,6 +1,6 @@
 # Story 1.5.2: Design tokens Tailwind et composants de base
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -380,13 +380,13 @@ Aucun incident de debug notable.
 
 - **Task 1-2** : Design tokens CSS implémentés dans `styles/tokens/_base.css` (tokens invariants : surfaces, textes, bordures, fonctionnels, spacing, radius, typographie) et `styles/tokens/bon-pote.css` (thème "Bon Pote" : accents, humeurs, bulles). Mapping `@theme` Tailwind v4 configuré dans `styles.css`. Font Inter importée depuis Google Fonts. Classe `theme-bon-pote` appliquée sur `<body>`.
 - **Task 3** : `@angular/cdk` installé — OverlayModule, A11yModule, PortalModule disponibles.
-- **Task 4** : Composant `ButtonComponent` — 5 variantes (primary, secondary, ghost, danger, icon-only), 3 tailles (sm, md, lg), focus-visible avec outline accent-primary, `prefers-reduced-motion` respecté. 18 tests.
-- **Task 5** : Composant `InputComponent` — Label positionné au-dessus, 44px minimum, états focus/error/disabled, aria-invalid + aria-describedby pour l'accessibilité. 16 tests.
+- **Task 4** : Composant `ButtonComponent` — 5 variantes (primary, secondary, ghost, danger, icon-only), 3 tailles (sm, md, lg), focus-visible avec outline accent-primary, `prefers-reduced-motion` respecté, input `ariaLabel` pour boutons icon-only (accessibilité WCAG). 21 tests.
+- **Task 5** : Composant `InputComponent` — Label positionné au-dessus, 44px minimum, états focus/error/disabled, aria-invalid + aria-describedby, ControlValueAccessor implémenté (compatible ngModel/formControl). 20 tests.
 - **Task 6** : Composant `CardComponent` — Fond surface-1 (défaut) ou surface-2 (elevated), content projection via ng-content. 7 tests.
-- **Task 7** : Composant `ToastComponent` + `ToastContainerComponent` + `ToastService` — 4 variantes (success/error/warning/info), auto-dismiss 5s, max 3 visibles, top-right desktop / top-center mobile via BreakpointObserver. 18 tests.
-- **Task 8** : Composant `ModalComponent` + `ModalService` — Overlay backdrop sombre, CDK FocusTrap, Escape + backdrop click ferment, boutons Annuler/Confirmer, confirm() retourne Observable<boolean>. 14 tests.
+- **Task 7** : Composant `ToastComponent` + `ToastContainerComponent` + `ToastService` — 4 variantes (success/error/warning/info), auto-dismiss 5s, max 3 visibles, top-right desktop / top-center mobile via BreakpointObserver. Fix timer leak sur éviction. Retrait `::ng-deep` déprécié. 33 tests (dont 15 tests service dédiés).
+- **Task 8** : Composant `ModalComponent` + `ModalHostComponent` + `ModalService` — Overlay backdrop sombre, CDK FocusTrap, Escape + backdrop click ferment, boutons Annuler/Confirmer, confirm() retourne Observable<boolean>. ModalHostComponent connecte le service au rendu. 31 tests (dont 11 tests service + 6 tests host).
 - **Task 9** : Classes utilitaires skeleton : `.skeleton` (shimmer gradient 2s), `.skeleton-text`, `.skeleton-circle`, `.skeleton-rect`. `prefers-reduced-motion` => pulse opacity.
-- **Task 10** : 116 tests passent (43 existants + 73 nouveaux), build production réussi.
+- **Task 10** : 155 tests passent (43 existants + 112 nouveaux), build production réussi.
 
 ### File List
 
@@ -405,8 +405,12 @@ Aucun incident de debug notable.
 - `frontend/src/app/shared/ui/toast/toast-container.spec.ts` — Tests Toast Container
 - `frontend/src/app/shared/ui/modal/modal.ts` — Composant Modal
 - `frontend/src/app/shared/ui/modal/modal.spec.ts` — Tests Modal
+- `frontend/src/app/shared/ui/modal/modal-host.ts` — Composant hôte pour rendu programmatique du modal
+- `frontend/src/app/shared/ui/modal/modal-host.spec.ts` — Tests Modal Host
 - `frontend/src/app/core/services/toast.service.ts` — Service Toast
+- `frontend/src/app/core/services/toast.service.spec.ts` — Tests Service Toast
 - `frontend/src/app/core/services/modal.service.ts` — Service Modal
+- `frontend/src/app/core/services/modal.service.spec.ts` — Tests Service Modal
 
 **Fichiers modifiés :**
 - `frontend/src/styles.css` — Import tokens + @theme Tailwind v4 + skeleton utilities
@@ -416,3 +420,14 @@ Aucun incident de debug notable.
 ### Change Log
 
 - 2026-02-17 : Implémentation complète du design system — design tokens CSS (surfaces, textes, fonctionnels, spacing, radius, typo), thème "Bon Pote" par défaut, mapping Tailwind v4 @theme, font Inter, 5 composants UI de base (Button, Input, Card, Toast, Modal), services d'orchestration (ToastService, ModalService), utilitaires skeleton. 73 nouveaux tests, 116 total, build production OK.
+- 2026-02-17 : **Code Review (AI)** — 11 issues trouvées (4 HIGH, 4 MEDIUM, 3 LOW). 8 issues HIGH+MEDIUM corrigées :
+  - H1: Ajout input `ariaLabel` sur ButtonComponent pour variante icon-only (WCAG)
+  - H2: Création ModalHostComponent pour connecter ModalService au rendu
+  - H3: Implémentation ControlValueAccessor sur InputComponent (compatible ngModel/formControl)
+  - H4: Création tests dédiés pour ModalService (11 tests)
+  - M1: Fix fuite de timer sur éviction de toasts
+  - M2: Retrait `::ng-deep` déprécié, `pointer-events: auto` déplacé sur `:host` du ToastComponent
+  - M3: Création tests dédiés pour ToastService (15 tests)
+  - M4: Font Inter mise à jour vers variable font
+  - Issues LOW non corrigées (acceptées) : L1 pnpm-lock.yaml non documenté, L2 compteurs module-level, L3 icônes Unicode
+  - 155 tests passent (16 fichiers), build production OK.

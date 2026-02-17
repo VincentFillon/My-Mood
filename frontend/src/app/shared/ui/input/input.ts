@@ -1,12 +1,18 @@
-import { Component, computed, input } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, forwardRef, input, signal } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 let nextId = 0;
 
 @Component({
   selector: 'app-input',
   standalone: true,
-  imports: [FormsModule],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => InputComponent),
+      multi: true,
+    },
+  ],
   template: `
     <div class="input-wrapper">
       @if (label()) {
@@ -16,12 +22,13 @@ let nextId = 0;
         [id]="inputId"
         [type]="type()"
         [placeholder]="placeholder()"
-        [disabled]="disabled()"
-        [value]="value()"
+        [disabled]="isDisabled()"
+        [value]="currentValue()"
         [class]="inputClasses()"
         [attr.aria-invalid]="hasError() || null"
         [attr.aria-describedby]="hasError() ? errorId : null"
         (input)="onInput($event)"
+        (blur)="onTouched()"
       />
       @if (hasError()) {
         <p [id]="errorId" class="input-error" role="alert">{{ error() }}</p>
@@ -88,7 +95,7 @@ let nextId = 0;
     }
   `,
 })
-export class InputComponent {
+export class InputComponent implements ControlValueAccessor {
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly type = input<string>('text');
@@ -99,14 +106,39 @@ export class InputComponent {
   readonly inputId = `app-input-${nextId++}`;
   readonly errorId = `${this.inputId}-error`;
 
+  private readonly _value = signal('');
+  private readonly _disabled = signal(false);
+
+  readonly currentValue = computed(() => this._value() || this.value());
+  readonly isDisabled = computed(() => this._disabled() || this.disabled());
   readonly hasError = computed(() => !!this.error());
 
   readonly inputClasses = computed(() => {
     return this.hasError() ? 'input-error-state' : '';
   });
 
-  onInput(event: Event) {
-    // Let the parent handle value binding via ngModel or formControl
-    // This is a presentational component
+  private onChange: (value: string) => void = () => {};
+  onTouched: () => void = () => {};
+
+  writeValue(value: string): void {
+    this._value.set(value ?? '');
+  }
+
+  registerOnChange(fn: (value: string) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this._disabled.set(isDisabled);
+  }
+
+  onInput(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    this._value.set(val);
+    this.onChange(val);
   }
 }

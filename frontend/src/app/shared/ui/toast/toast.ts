@@ -19,6 +19,11 @@ const VARIANT_ICONS: Record<ToastVariant, string> = {
     </div>
   `,
   styles: `
+    :host {
+      display: block;
+      pointer-events: auto;
+    }
+
     .toast {
       display: flex;
       align-items: center;

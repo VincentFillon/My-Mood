@@ -25,7 +25,15 @@ export class ToastService {
 
     this._toasts.update((current) => {
       const updated = [...current, toast];
-      // Keep only the last MAX_VISIBLE toasts
+      // Clear timers for evicted toasts before slicing
+      const evicted = updated.slice(0, -MAX_VISIBLE);
+      for (const t of evicted) {
+        const evictedTimer = this.timers.get(t.id);
+        if (evictedTimer) {
+          clearTimeout(evictedTimer);
+          this.timers.delete(t.id);
+        }
+      }
       return updated.slice(-MAX_VISIBLE);
     });
 

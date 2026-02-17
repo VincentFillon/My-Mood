@@ -12,6 +12,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg';
       [disabled]="disabled()"
       [class]="classes()"
       [attr.aria-disabled]="disabled() || null"
+      [attr.aria-label]="ariaLabel() || null"
     >
       <ng-content />
     </button>
@@ -130,6 +131,7 @@ export class ButtonComponent {
   readonly size = input<ButtonSize>('md');
   readonly disabled = input(false);
   readonly type = input<'button' | 'submit'>('button');
+  readonly ariaLabel = input<string>('');
 
   readonly classes = computed(() => {
     const v = this.variant();

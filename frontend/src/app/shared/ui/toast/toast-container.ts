@@ -29,7 +29,7 @@ import { ToastComponent } from './toast';
       pointer-events: none;
     }
 
-    .toast-container > :host ::ng-deep app-toast {
+    .toast-container app-toast {
       pointer-events: auto;
     }
 
