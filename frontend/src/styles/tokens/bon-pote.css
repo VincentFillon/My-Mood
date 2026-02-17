@@ -1,0 +1,23 @@
+/* Theme "Bon Pote" — thème par défaut de My Mood */
+/* Tokens d'accent, humeurs, bulles, messages système */
+
+.theme-bon-pote {
+  /* ── Accent ── */
+  --accent-primary: #4ECDC4;
+  --accent-secondary: #45B7AA;
+  --accent-glow: #4ECDC440;
+
+  /* ── Humeurs ── */
+  --mood-great: #4ECDC4;
+  --mood-good: #7ED68A;
+  --mood-neutral: #FFD93D;
+  --mood-bad: #FF8C42;
+  --mood-terrible: #FF6B6B;
+
+  /* ── Bulles de chat ── */
+  --bubble-self: #1a3a36;
+  --bubble-other: #242424;
+
+  /* ── Messages système ── */
+  --system-message: #1a1a2e;
+}

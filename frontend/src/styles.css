@@ -1,1 +1,117 @@
+/* Design tokens */
+@import "./styles/tokens/_base.css";
+@import "./styles/tokens/bon-pote.css";
+
 @import "tailwindcss";
+
+/* ── Mapping tokens → Tailwind v4 via @theme ── */
+@theme {
+  /* Couleurs surfaces */
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  /* Couleurs texte */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  /* Couleurs bordures */
+  --color-border-default: var(--border);
+  --color-separator: var(--separator);
+
+  /* Couleurs fonctionnelles */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-online: var(--online);
+  --color-offline: var(--offline);
+
+  /* Couleurs accent */
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-glow: var(--accent-glow);
+
+  /* Couleurs humeur */
+  --color-mood-great: var(--mood-great);
+  --color-mood-good: var(--mood-good);
+  --color-mood-neutral: var(--mood-neutral);
+  --color-mood-bad: var(--mood-bad);
+  --color-mood-terrible: var(--mood-terrible);
+
+  /* Couleurs bulles */
+  --color-bubble-self: var(--bubble-self);
+  --color-bubble-other: var(--bubble-other);
+  --color-system-message: var(--system-message);
+
+  /* Font family */
+  --font-sans: 'Inter', sans-serif;
+
+  /* Border radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+}
+
+/* ── Styles globaux ── */
+body {
+  background-color: var(--surface-0);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  line-height: var(--leading-body);
+}
+
+/* ── Skeleton screen utilities ── */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2s infinite linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: skeleton-pulse 2s infinite ease-in-out;
+    background: var(--surface-2);
+  }
+
+  @keyframes skeleton-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
+
+.skeleton-text {
+  height: 1em;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-circle {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-rect {
+  border-radius: var(--radius-sm);
+}

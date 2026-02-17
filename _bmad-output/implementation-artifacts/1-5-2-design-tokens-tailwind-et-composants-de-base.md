@@ -1,6 +1,6 @@
 # Story 1.5.2: Design tokens Tailwind et composants de base
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -38,78 +38,78 @@ so that toutes les stories suivantes disposent d'un design system cohérent, th�
 
 ### Design Tokens & Configuration Tailwind
 
-- [ ] Task 1 — Implémenter les design tokens CSS (AC: #1, #2)
-  - [ ] Créer `frontend/src/styles/tokens/_base.css` avec les tokens invariants (surfaces, textes, bordures, fonctionnels, spacing, radius, typographie)
-  - [ ] Créer `frontend/src/styles/tokens/bon-pote.css` avec les tokens d'accent du thème "Bon Pote" (accent, mood, bulles, system-message)
-  - [ ] Mettre à jour `frontend/src/styles.css` pour importer les tokens avant `@import "tailwindcss"` et configurer le mapping `@theme` Tailwind v4
-  - [ ] Appliquer la classe `theme-bon-pote` sur le `<body>` dans `index.html` (thème par défaut)
-  - [ ] Vérifier que les CSS custom properties sont accessibles dans les utility classes Tailwind (ex: `bg-[var(--surface-0)]` ou mapping via `@theme`)
+- [x] Task 1 — Implémenter les design tokens CSS (AC: #1, #2)
+  - [x]Créer `frontend/src/styles/tokens/_base.css` avec les tokens invariants (surfaces, textes, bordures, fonctionnels, spacing, radius, typographie)
+  - [x]Créer `frontend/src/styles/tokens/bon-pote.css` avec les tokens d'accent du thème "Bon Pote" (accent, mood, bulles, system-message)
+  - [x]Mettre à jour `frontend/src/styles.css` pour importer les tokens avant `@import "tailwindcss"` et configurer le mapping `@theme` Tailwind v4
+  - [x]Appliquer la classe `theme-bon-pote` sur le `<body>` dans `index.html` (thème par défaut)
+  - [x]Vérifier que les CSS custom properties sont accessibles dans les utility classes Tailwind (ex: `bg-[var(--surface-0)]` ou mapping via `@theme`)
 
-- [ ] Task 2 — Configurer la font Inter (AC: #3)
-  - [ ] Ajouter le lien Google Fonts Inter (variable, wght 400..700) dans `frontend/src/index.html`
-  - [ ] Configurer Inter comme `font-family` par défaut dans le `@theme` Tailwind ou en CSS global
-  - [ ] Vérifier le rendu en 400, 500, 600, 700
+- [x] Task 2 — Configurer la font Inter (AC: #3)
+  - [x]Ajouter le lien Google Fonts Inter (variable, wght 400..700) dans `frontend/src/index.html`
+  - [x]Configurer Inter comme `font-family` par défaut dans le `@theme` Tailwind ou en CSS global
+  - [x]Vérifier le rendu en 400, 500, 600, 700
 
 ### Composants UI de base
 
-- [ ] Task 3 — Installer Angular CDK (AC: #9)
-  - [ ] `pnpm --filter frontend add @angular/cdk`
-  - [ ] Vérifier que `OverlayModule`, `A11yModule`, `PortalModule` sont importables sans erreur de build
+- [x] Task 3 — Installer Angular CDK (AC: #9)
+  - [x]`pnpm --filter frontend add @angular/cdk`
+  - [x]Vérifier que `OverlayModule`, `A11yModule`, `PortalModule` sont importables sans erreur de build
 
-- [ ] Task 4 — Créer le composant Button (AC: #4, #10)
-  - [ ] Créer `frontend/src/app/shared/ui/button/button.ts` — standalone component
-  - [ ] Inputs : `variant` ('primary' | 'secondary' | 'ghost' | 'danger' | 'icon-only'), `disabled`, `type` ('button' | 'submit'), `size` ('sm' | 'md' | 'lg')
-  - [ ] Styles via classes Tailwind consommant les design tokens
-  - [ ] Hover, focus (outline `--accent-primary` 2px offset 2px), disabled states
-  - [ ] Respect `prefers-reduced-motion` sur les transitions
-  - [ ] Créer `frontend/src/app/shared/ui/button/button.spec.ts` — tests de rendu, variantes, accessibilité
+- [x] Task 4 — Créer le composant Button (AC: #4, #10)
+  - [x]Créer `frontend/src/app/shared/ui/button/button.ts` — standalone component
+  - [x]Inputs : `variant` ('primary' | 'secondary' | 'ghost' | 'danger' | 'icon-only'), `disabled`, `type` ('button' | 'submit'), `size` ('sm' | 'md' | 'lg')
+  - [x]Styles via classes Tailwind consommant les design tokens
+  - [x]Hover, focus (outline `--accent-primary` 2px offset 2px), disabled states
+  - [x]Respect `prefers-reduced-motion` sur les transitions
+  - [x]Créer `frontend/src/app/shared/ui/button/button.spec.ts` — tests de rendu, variantes, accessibilité
 
-- [ ] Task 5 — Créer le composant Input (AC: #5, #10)
-  - [ ] Créer `frontend/src/app/shared/ui/input/input.ts` — standalone component
-  - [ ] Inputs : `label`, `placeholder`, `type`, `error` (message d'erreur), `disabled`
-  - [ ] Label positionné au-dessus (block), input 44px height minimum
-  - [ ] États : default, focus (bordure `--accent-primary`), error (bordure `--error` + message), disabled
-  - [ ] Créer `frontend/src/app/shared/ui/input/input.spec.ts`
+- [x] Task 5 — Créer le composant Input (AC: #5, #10)
+  - [x]Créer `frontend/src/app/shared/ui/input/input.ts` — standalone component
+  - [x]Inputs : `label`, `placeholder`, `type`, `error` (message d'erreur), `disabled`
+  - [x]Label positionné au-dessus (block), input 44px height minimum
+  - [x]États : default, focus (bordure `--accent-primary`), error (bordure `--error` + message), disabled
+  - [x]Créer `frontend/src/app/shared/ui/input/input.spec.ts`
 
-- [ ] Task 6 — Créer le composant Card (AC: #6, #10)
-  - [ ] Créer `frontend/src/app/shared/ui/card/card.ts` — standalone component
-  - [ ] Inputs : `elevated` (boolean)
-  - [ ] Content projection via `<ng-content>`
-  - [ ] Fond `--surface-1` (default) ou `--surface-2` (elevated), radius-lg, padding space-4
-  - [ ] Créer `frontend/src/app/shared/ui/card/card.spec.ts`
+- [x] Task 6 — Créer le composant Card (AC: #6, #10)
+  - [x]Créer `frontend/src/app/shared/ui/card/card.ts` — standalone component
+  - [x]Inputs : `elevated` (boolean)
+  - [x]Content projection via `<ng-content>`
+  - [x]Fond `--surface-1` (default) ou `--surface-2` (elevated), radius-lg, padding space-4
+  - [x]Créer `frontend/src/app/shared/ui/card/card.spec.ts`
 
-- [ ] Task 7 — Créer le composant NotificationToast (AC: #7, #10)
-  - [ ] Créer `frontend/src/app/shared/ui/toast/toast.ts` — standalone component
-  - [ ] Créer `frontend/src/app/shared/ui/toast/toast-container.ts` — orchestrateur de toasts (overlay CDK)
-  - [ ] Créer `frontend/src/app/core/services/toast.service.ts` — service injectable pour déclencher les toasts
-  - [ ] Variantes : success, error, warning, info avec icône et couleur fonctionnelle correspondante
-  - [ ] Auto-dismiss 5s, empilable (max 3), animation slide-in/slide-out
-  - [ ] Positionnement : haut-droite desktop, haut-centre mobile (via `BreakpointObserver`)
-  - [ ] Créer `frontend/src/app/shared/ui/toast/toast.spec.ts` et `toast-container.spec.ts`
+- [x] Task 7 — Créer le composant NotificationToast (AC: #7, #10)
+  - [x]Créer `frontend/src/app/shared/ui/toast/toast.ts` — standalone component
+  - [x]Créer `frontend/src/app/shared/ui/toast/toast-container.ts` — orchestrateur de toasts (overlay CDK)
+  - [x]Créer `frontend/src/app/core/services/toast.service.ts` — service injectable pour déclencher les toasts
+  - [x]Variantes : success, error, warning, info avec icône et couleur fonctionnelle correspondante
+  - [x]Auto-dismiss 5s, empilable (max 3), animation slide-in/slide-out
+  - [x]Positionnement : haut-droite desktop, haut-centre mobile (via `BreakpointObserver`)
+  - [x]Créer `frontend/src/app/shared/ui/toast/toast.spec.ts` et `toast-container.spec.ts`
 
-- [ ] Task 8 — Créer le composant Modal / ConfirmDialog (AC: #8, #10)
-  - [ ] Créer `frontend/src/app/shared/ui/modal/modal.ts` — standalone component
-  - [ ] Créer `frontend/src/app/core/services/modal.service.ts` — service injectable pour ouvrir des modals
-  - [ ] CDK Overlay centré + backdrop assombri (`rgba(0,0,0,0.6)`)
-  - [ ] CDK FocusTrap pour piéger le focus
-  - [ ] Escape et backdrop click ferment le modal
-  - [ ] Content projection pour le corps, slots pour titre et actions
-  - [ ] Méthode `confirm(title, message, confirmLabel?)` retournant `Observable<boolean>`
-  - [ ] Créer `frontend/src/app/shared/ui/modal/modal.spec.ts`
+- [x] Task 8 — Créer le composant Modal / ConfirmDialog (AC: #8, #10)
+  - [x]Créer `frontend/src/app/shared/ui/modal/modal.ts` — standalone component
+  - [x]Créer `frontend/src/app/core/services/modal.service.ts` — service injectable pour ouvrir des modals
+  - [x]CDK Overlay centré + backdrop assombri (`rgba(0,0,0,0.6)`)
+  - [x]CDK FocusTrap pour piéger le focus
+  - [x]Escape et backdrop click ferment le modal
+  - [x]Content projection pour le corps, slots pour titre et actions
+  - [x]Méthode `confirm(title, message, confirmLabel?)` retournant `Observable<boolean>`
+  - [x]Créer `frontend/src/app/shared/ui/modal/modal.spec.ts`
 
 ### Utilitaires de design system
 
-- [ ] Task 9 — Créer les utilitaires skeleton (AC: #11)
-  - [ ] Ajouter dans `frontend/src/styles.css` ou fichier dédié : classe `.skeleton` avec animation shimmer (gradient linéaire gauche→droite, 2s infinite)
-  - [ ] Variante `prefers-reduced-motion` : opacity pulse simple
-  - [ ] Classes utilitaires : `.skeleton-text` (hauteur 1em, radius-sm), `.skeleton-circle` (ratio 1:1, radius-full), `.skeleton-rect` (ratio libre)
+- [x] Task 9 — Créer les utilitaires skeleton (AC: #11)
+  - [x]Ajouter dans `frontend/src/styles.css` ou fichier dédié : classe `.skeleton` avec animation shimmer (gradient linéaire gauche→droite, 2s infinite)
+  - [x]Variante `prefers-reduced-motion` : opacity pulse simple
+  - [x]Classes utilitaires : `.skeleton-text` (hauteur 1em, radius-sm), `.skeleton-circle` (ratio 1:1, radius-full), `.skeleton-rect` (ratio libre)
 
 ### Validation
 
-- [ ] Task 10 — Tests et vérification globale (AC: #10)
-  - [ ] `pnpm --filter frontend test` — tous les tests passent (43 existants + nouveaux)
-  - [ ] Build production `pnpm --filter frontend build` — aucune erreur
-  - [ ] Vérification visuelle : les tokens sont effectivement appliqués (fond sombre, accent teal, font Inter)
+- [x] Task 10 — Tests et vérification globale (AC: #10)
+  - [x]`pnpm --filter frontend test` — tous les tests passent (43 existants + nouveaux)
+  - [x]Build production `pnpm --filter frontend build` — aucune erreur
+  - [x]Vérification visuelle : les tokens sont effectivement appliqués (fond sombre, accent teal, font Inter)
 
 ## Dev Notes
 
@@ -370,12 +370,49 @@ frontend/src/
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Claude Opus 4.6
 
 ### Debug Log References
 
+Aucun incident de debug notable.
+
 ### Completion Notes List
+
+- **Task 1-2** : Design tokens CSS implémentés dans `styles/tokens/_base.css` (tokens invariants : surfaces, textes, bordures, fonctionnels, spacing, radius, typographie) et `styles/tokens/bon-pote.css` (thème "Bon Pote" : accents, humeurs, bulles). Mapping `@theme` Tailwind v4 configuré dans `styles.css`. Font Inter importée depuis Google Fonts. Classe `theme-bon-pote` appliquée sur `<body>`.
+- **Task 3** : `@angular/cdk` installé — OverlayModule, A11yModule, PortalModule disponibles.
+- **Task 4** : Composant `ButtonComponent` — 5 variantes (primary, secondary, ghost, danger, icon-only), 3 tailles (sm, md, lg), focus-visible avec outline accent-primary, `prefers-reduced-motion` respecté. 18 tests.
+- **Task 5** : Composant `InputComponent` — Label positionné au-dessus, 44px minimum, états focus/error/disabled, aria-invalid + aria-describedby pour l'accessibilité. 16 tests.
+- **Task 6** : Composant `CardComponent` — Fond surface-1 (défaut) ou surface-2 (elevated), content projection via ng-content. 7 tests.
+- **Task 7** : Composant `ToastComponent` + `ToastContainerComponent` + `ToastService` — 4 variantes (success/error/warning/info), auto-dismiss 5s, max 3 visibles, top-right desktop / top-center mobile via BreakpointObserver. 18 tests.
+- **Task 8** : Composant `ModalComponent` + `ModalService` — Overlay backdrop sombre, CDK FocusTrap, Escape + backdrop click ferment, boutons Annuler/Confirmer, confirm() retourne Observable<boolean>. 14 tests.
+- **Task 9** : Classes utilitaires skeleton : `.skeleton` (shimmer gradient 2s), `.skeleton-text`, `.skeleton-circle`, `.skeleton-rect`. `prefers-reduced-motion` => pulse opacity.
+- **Task 10** : 116 tests passent (43 existants + 73 nouveaux), build production réussi.
 
 ### File List
 
+**Nouveaux fichiers :**
+- `frontend/src/styles/tokens/_base.css` — Tokens invariants
+- `frontend/src/styles/tokens/bon-pote.css` — Thème "Bon Pote"
+- `frontend/src/app/shared/ui/button/button.ts` — Composant Button
+- `frontend/src/app/shared/ui/button/button.spec.ts` — Tests Button
+- `frontend/src/app/shared/ui/input/input.ts` — Composant Input
+- `frontend/src/app/shared/ui/input/input.spec.ts` — Tests Input
+- `frontend/src/app/shared/ui/card/card.ts` — Composant Card
+- `frontend/src/app/shared/ui/card/card.spec.ts` — Tests Card
+- `frontend/src/app/shared/ui/toast/toast.ts` — Composant Toast
+- `frontend/src/app/shared/ui/toast/toast-container.ts` — Toast Container
+- `frontend/src/app/shared/ui/toast/toast.spec.ts` — Tests Toast
+- `frontend/src/app/shared/ui/toast/toast-container.spec.ts` — Tests Toast Container
+- `frontend/src/app/shared/ui/modal/modal.ts` — Composant Modal
+- `frontend/src/app/shared/ui/modal/modal.spec.ts` — Tests Modal
+- `frontend/src/app/core/services/toast.service.ts` — Service Toast
+- `frontend/src/app/core/services/modal.service.ts` — Service Modal
+
+**Fichiers modifiés :**
+- `frontend/src/styles.css` — Import tokens + @theme Tailwind v4 + skeleton utilities
+- `frontend/src/index.html` — Google Fonts Inter + classe theme-bon-pote sur body
+- `frontend/package.json` — Ajout @angular/cdk
+
 ### Change Log
+
+- 2026-02-17 : Implémentation complète du design system — design tokens CSS (surfaces, textes, fonctionnels, spacing, radius, typo), thème "Bon Pote" par défaut, mapping Tailwind v4 @theme, font Inter, 5 composants UI de base (Button, Input, Card, Toast, Modal), services d'orchestration (ToastService, ModalService), utilitaires skeleton. 73 nouveaux tests, 116 total, build production OK.
