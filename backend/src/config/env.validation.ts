@@ -22,6 +22,7 @@ export const envSchema = z.object({
     .enum(['development', 'production', 'test'])
     .default('development'),
   API_PORT: z.coerce.number().default(3000),
+  FRONTEND_PORT: z.coerce.number().default(4200),
   FRONTEND_URL: z.string().url().default('http://localhost:4200'),
 });
 

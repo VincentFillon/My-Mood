@@ -16,6 +16,7 @@ import { UsersModule } from './users/users.module.js';
     ConfigModule.forRoot({
       validate: validateEnv,
       isGlobal: true,
+      expandVariables: true,
     }),
     ThrottlerModule.forRoot([
       {
