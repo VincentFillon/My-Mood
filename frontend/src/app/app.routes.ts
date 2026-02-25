@@ -24,6 +24,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'groups',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/groups/groups.routes.js').then((m) => m.routes),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     children: [],

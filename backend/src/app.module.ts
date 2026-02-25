@@ -10,6 +10,7 @@ import { validateEnv } from './config/env.validation.js';
 import { FilesModule } from './files/files.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { UsersModule } from './users/users.module.js';
+import { GroupsModule } from './groups/groups.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UsersModule } from './users/users.module.js';
     AuthModule,
     FilesModule,
     UsersModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -38,4 +40,4 @@ import { UsersModule } from './users/users.module.js';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
