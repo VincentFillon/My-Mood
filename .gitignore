@@ -1,5 +1,7 @@
 _bmad/
 .claude/
+.kilocode/
+.agent/
 
 # Dependencies
 node_modules/
