@@ -29,6 +29,10 @@ export const routes: Routes = [
     loadChildren: () => import('./features/groups/groups.routes.js').then((m) => m.routes),
   },
   {
+    path: 'invite/:token',
+    loadComponent: () => import('./features/groups/join-group/join-group.js').then((m) => m.JoinGroupComponent),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     children: [],

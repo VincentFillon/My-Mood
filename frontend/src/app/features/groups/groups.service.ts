@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.js';
-import { CreateGroupDto, GroupResponse } from '@shared/schemas/group.schema';
+import { CreateGroupDto, GroupResponse, InviteUrlResponse } from '@shared/schemas/group.schema.js';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -47,6 +47,28 @@ export class GroupsService {
             this.error.set(err.error?.message || 'Erreur lors du chargement des groupes');
         } finally {
             this.loading.set(false);
+        }
+    }
+
+    async generateInvite(groupId: string): Promise<InviteUrlResponse> {
+        try {
+            const response = await firstValueFrom(
+                this.#http.post<{ data: InviteUrlResponse }>(`${environment.apiUrl}/v1/groups/${groupId}/invite`, {})
+            );
+            return response.data;
+        } catch (err: any) {
+            throw err?.error?.message || 'Erreur lors de la génération du lien d\'invitation';
+        }
+    }
+
+    async joinGroup(token: string): Promise<{ message: string, groupId: string }> {
+        try {
+            const response = await firstValueFrom(
+                this.#http.post<{ data: { message: string, groupId: string } }>(`${environment.apiUrl}/v1/groups/join/${token}`, {})
+            );
+            return response.data;
+        } catch (err: any) {
+            throw err;
         }
     }
 }

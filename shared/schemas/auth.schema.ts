@@ -7,6 +7,7 @@ export const RegisterSchema = z.object({
   gdprConsent: z.literal(true, {
     message: 'Vous devez accepter les conditions d\'utilisation',
   }),
+  inviteToken: z.string().uuid('Jeton d\'invitation invalide').optional(),
 });
 
 export type RegisterInput = z.infer<typeof RegisterSchema>;

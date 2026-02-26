@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { GroupsService } from '../groups.service';
+import { Clipboard } from '@angular/cdk/clipboard';
+import { GroupsService } from '../groups.service.js';
+import { InviteUrlResponse } from '@shared/schemas/group.schema.js';
 
 @Component({
   selector: 'app-group-detail',
@@ -53,11 +55,23 @@ import { GroupsService } from '../groups.service';
           <div class="border rounded-md overflow-hidden">
             <div class="bg-muted px-4 py-3 text-sm font-medium">Inviter un membre</div>
             <div class="p-4 bg-background">
-              <p class="text-sm mb-2">Partagez ce lien unique avec votre équipe pour les inviter.</p>
-              <div class="flex gap-2">
-                <input type="text" disabled [value]="inviteLink()" class="flex-1 bg-muted/50 rounded-md border px-3 py-2 text-sm text-muted-foreground">
-                <button disabled class="rounded-md bg-secondary text-secondary-foreground h-10 px-4 py-2 text-sm font-medium opacity-50 cursor-not-allowed">Copier</button>
-              </div>
+              <p class="text-sm mb-4">Partagez ce lien unique avec votre équipe pour les inviter.</p>
+              @if (generatedInvite()) {
+                <div class="flex gap-2 mb-2">
+                  <input type="text" readonly [value]="generatedInvite()?.url" class="flex-1 bg-muted/50 rounded-md border px-3 py-2 text-sm text-foreground">
+                  <button (click)="copyInviteLink()" class="rounded-md bg-secondary text-secondary-foreground h-10 px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors">Copier</button>
+                </div>
+                @if (copied()) {
+                    <p class="text-sm text-green-600">Lien copié dans le presse-papier !</p>
+                }
+              } @else {
+                  <button (click)="generateInvite()" [disabled]="loadingInvite()" class="rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                    {{ loadingInvite() ? 'Génération...' : 'Générer un lien d\\'invitation' }}
+                  </button>
+              }
+              @if (inviteError()) {
+                  <p class="text-sm text-destructive mt-2">{{ inviteError() }}</p>
+              }
             </div>
           </div>
         </div>
@@ -70,8 +84,36 @@ export class GroupDetailComponent {
   groupsService = inject(GroupsService);
   activeTab = signal<'dashboard' | 'members'>('dashboard');
 
-  inviteLink() {
-    const id = this.groupsService.currentGroup()?.id || 'XXXXXX';
-    return \`https://my-mood.app/invite/\${id}\`;
+  clipboard = inject(Clipboard);
+
+  generatedInvite = signal<InviteUrlResponse | null>(null);
+  loadingInvite = signal(false);
+  inviteError = signal<string | null>(null);
+  copied = signal(false);
+
+  async generateInvite() {
+    const groupId = this.groupsService.currentGroup()?.id;
+    if (!groupId) return;
+
+    this.loadingInvite.set(true);
+    this.inviteError.set(null);
+    try {
+      const invite = await this.groupsService.generateInvite(groupId);
+      this.generatedInvite.set(invite);
+      this.copied.set(false);
+    } catch (err: any) {
+      this.inviteError.set(err);
+    } finally {
+      this.loadingInvite.set(false);
     }
+  }
+
+  copyInviteLink() {
+    const url = this.generatedInvite()?.url;
+    if (url) {
+      this.clipboard.copy(url);
+      this.copied.set(true);
+      setTimeout(() => this.copied.set(false), 3000);
+    }
+  }
 }

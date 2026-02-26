@@ -13,6 +13,7 @@ import * as argon2 from 'argon2';
 import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UsersService } from '../users/users.service.js';
+import { MemberRole } from '../../generated/prisma/client.js';
 
 // Pre-computed dummy hash for timing side-channel prevention
 const DUMMY_HASH =
@@ -27,7 +28,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
-  ) {}
+  ) { }
 
   async register(dto: RegisterInput) {
     const passwordHash = await argon2.hash(dto.password, {
@@ -53,6 +54,23 @@ export class AuthService {
       passwordHash,
       gdprConsentAt: new Date(),
     });
+
+    if (dto.inviteToken) {
+      const invite = await this.prismaService.db.groupInvite.findUnique({
+        where: { token: dto.inviteToken },
+      });
+
+      if (invite && invite.expiresAt > new Date()) {
+        await this.prismaService.db.groupMember.create({
+          data: {
+            groupId: invite.groupId,
+            userId: user.id,
+            role: MemberRole.member,
+          }
+        });
+        this.logger.log(`User ${user.id} joined group ${invite.groupId} via invite`);
+      }
+    }
 
     this.logger.log(`User registered: ${user.id}`);
 

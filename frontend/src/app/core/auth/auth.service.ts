@@ -25,7 +25,7 @@ export class AuthService {
   constructor(
     private readonly http: HttpClient,
     private readonly router: Router,
-  ) {}
+  ) { }
 
   get accessToken(): string | null {
     return this._accessToken;
@@ -44,7 +44,14 @@ export class AuthService {
 
       this._accessToken = response.data.accessToken;
       this._currentUser.set(response.data.user);
-      await this.router.navigate(['/']);
+
+      const pendingInvite = localStorage.getItem('pendingInviteToken');
+      if (pendingInvite) {
+        localStorage.removeItem('pendingInviteToken');
+        await this.router.navigate(['/invite', pendingInvite]);
+      } else {
+        await this.router.navigate(['/']);
+      }
     } catch (err: unknown) {
       const message = this.extractErrorMessage(err);
       this._error.set(message);
@@ -66,7 +73,14 @@ export class AuthService {
 
       this._accessToken = response.data.accessToken;
       this._currentUser.set(response.data.user);
-      await this.router.navigate(['/']);
+
+      const pendingInvite = localStorage.getItem('pendingInviteToken');
+      if (pendingInvite) {
+        localStorage.removeItem('pendingInviteToken');
+        await this.router.navigate(['/invite', pendingInvite]);
+      } else {
+        await this.router.navigate(['/']);
+      }
     } catch (err: unknown) {
       const message = this.extractErrorMessage(err);
       this._error.set(message);

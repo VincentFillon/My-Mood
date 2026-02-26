@@ -239,6 +239,12 @@ export class RegisterComponent {
       return;
     }
 
-    await this.authService.register(result.data);
+    const payload = { ...result.data };
+    const pendingInvite = localStorage.getItem('pendingInviteToken');
+    if (pendingInvite) {
+      payload.inviteToken = pendingInvite;
+    }
+
+    await this.authService.register(payload);
   }
 }

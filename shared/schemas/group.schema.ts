@@ -14,3 +14,11 @@ export const GroupResponseSchema = z.object({
 });
 
 export type GroupResponse = z.infer<typeof GroupResponseSchema>;
+
+export const InviteUrlResponseSchema = z.object({
+    url: z.string().url(),
+    token: z.string().uuid(),
+    expiresAt: z.string().datetime(),
+});
+
+export type InviteUrlResponse = z.infer<typeof InviteUrlResponseSchema>;
