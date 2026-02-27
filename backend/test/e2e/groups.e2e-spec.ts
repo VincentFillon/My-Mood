@@ -117,5 +117,111 @@ describe('Groups (e2e)', () => {
                 .set('Authorization', `Bearer ${userToken}`)
                 .expect(404);
         });
+
+        it('should return 403 GROUP_FULL when trying to join a full group', async () => {
+            // we already have 1 member (creator_admin) and 1 from the previous tests (userToken). That's 2 members.
+            // We need to add 4 more members directly to the DB to reach 6.
+            const newUsersData = Array.from({ length: 4 }).map((_, i) => ({
+                id: `00000000-0000-0000-0000-${i.toString().padStart(12, '0')}`,
+                name: `Filler User ${i}`,
+                email: `filler${i}@e2e.com`,
+                passwordHash: 'dummy',
+                gdprConsentAt: new Date(),
+            }));
+
+            await prismaService.db.user.createMany({ data: newUsersData });
+
+            const newMembersData = newUsersData.map(u => ({
+                groupId: createdGroupId,
+                userId: u.id,
+                role: 'member' as any,
+            }));
+            await prismaService.db.groupMember.createMany({ data: newMembersData });
+
+            // Now group has 6 members. Let's create another user and try to join.
+            const resOverflowUser = await request.default(app.getHttpServer())
+                .post('/api/v1/auth/register')
+                .send({ name: 'OverflowUser', email: 'overflow@e2e.com', password: 'password', gdprConsent: true });
+            const overflowToken = resOverflowUser.body.data.accessToken;
+
+            const resJoin = await request.default(app.getHttpServer())
+                .post(`/api/v1/groups/join/${inviteTokenId}`)
+                .set('Authorization', `Bearer ${overflowToken}`)
+                .expect(403);
+
+            expect(resJoin.body.error).toBe('GROUP_FULL');
+
+            // Cleanup
+            await prismaService.db.user.deleteMany({
+                where: { email: { startsWith: 'filler' } }
+            });
+            await prismaService.db.user.delete({
+                where: { email: 'overflow@e2e.com' }
+            });
+        });
+    });
+
+    describe('DELETE /api/v1/groups/:groupId/members/:userId', () => {
+        let userToRemoveToken: string;
+        let userToRemoveId: string;
+
+        beforeAll(async () => {
+            // Register another user to remove
+            const resUser = await request.default(app.getHttpServer())
+                .post('/api/v1/auth/register')
+                .send({ name: 'UserToRemove', email: 'remove_me@e2e.com', password: 'password', gdprConsent: true });
+            userToRemoveToken = resUser.body.data.accessToken;
+
+            // Join group using token from previous test suite
+            await request.default(app.getHttpServer())
+                .post(`/api/v1/groups/join/${inviteTokenId}`)
+                .set('Authorization', `Bearer ${userToRemoveToken}`)
+                .expect(201);
+
+            // Fetch the user ID based on email
+            const userToRemoveRecord = await prismaService.db.user.findUnique({
+                where: { email: 'remove_me@e2e.com' }
+            });
+            userToRemoveId = userToRemoveRecord!.id;
+        });
+
+        afterAll(async () => {
+            await prismaService.db.user.delete({
+                where: { email: 'remove_me@e2e.com' }
+            });
+        });
+
+        it('should return 403 if a regular member tries to remove another member', async () => {
+            await request.default(app.getHttpServer())
+                .delete(`/api/v1/groups/${createdGroupId}/members/${userToRemoveId}`)
+                .set('Authorization', `Bearer ${userToken}`) // Normal user
+                .expect(403);
+        });
+
+        it('should return 400 if creator_admin tries to remove themselves', async () => {
+            const creatorUserRecord = await prismaService.db.user.findUnique({
+                where: { email: 'creator@e2e.com' }
+            });
+            const creatorId = creatorUserRecord!.id;
+
+            await request.default(app.getHttpServer())
+                .delete(`/api/v1/groups/${createdGroupId}/members/${creatorId}`)
+                .set('Authorization', `Bearer ${creatorToken}`) // Creator admin
+                .expect(400);
+        });
+
+        it('should remove a member successfully if user is creator_admin', async () => {
+            await request.default(app.getHttpServer())
+                .delete(`/api/v1/groups/${createdGroupId}/members/${userToRemoveId}`)
+                .set('Authorization', `Bearer ${creatorToken}`) // Creator admin
+                .expect(200);
+
+            // Verify member was removed
+            const groupMembers = await prismaService.db.groupMember.findMany({
+                where: { groupId: createdGroupId, userId: userToRemoveId }
+            });
+            expect(groupMembers.length).toBe(0);
+        });
     });
 });
+

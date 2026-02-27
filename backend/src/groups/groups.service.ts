@@ -1,6 +1,7 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateGroupDto, GroupResponse, InviteUrlResponse } from '@shared/schemas/group.schema.js';
+import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
 import { MemberRole } from '../../generated/prisma/client.js';
 
 @Injectable()
@@ -37,13 +38,21 @@ export class GroupsService {
             name: group.name,
             createdAt: group.createdAt.toISOString(),
             updatedAt: group.updatedAt.toISOString(),
+            role: MemberRole.creator_admin,
+            memberCount: 1,
         };
     }
 
     async getGroups(userId: string): Promise<GroupResponse[]> {
         const memberships = await this.prisma.db.groupMember.findMany({
             where: { userId },
-            include: { group: true },
+            include: {
+                group: {
+                    include: {
+                        _count: { select: { members: true } }
+                    }
+                }
+            },
         });
 
         return memberships.map(m => ({
@@ -51,6 +60,8 @@ export class GroupsService {
             name: m.group.name,
             createdAt: m.group.createdAt.toISOString(),
             updatedAt: m.group.updatedAt.toISOString(),
+            role: m.role as any,
+            memberCount: m.group._count.members,
         }));
     }
 
@@ -120,6 +131,18 @@ export class GroupsService {
             };
         }
 
+        const activeMembersCount = await this.prisma.db.groupMember.count({
+            where: { groupId: invite.groupId }
+        });
+
+        if (activeMembersCount >= MAX_GROUP_MEMBERS_FREE) {
+            throw new ForbiddenException({
+                statusCode: 403,
+                error: 'GROUP_FULL',
+                message: "Groupe plein — 6 membres maximum en plan Free",
+            });
+        }
+
         await this.prisma.db.groupMember.create({
             data: {
                 groupId: invite.groupId,
@@ -132,5 +155,58 @@ export class GroupsService {
             message: "Vous avez rejoint le groupe avec succès",
             groupId: invite.groupId,
         };
+    }
+
+    async removeMember(groupId: string, userId: string, requesterId: string): Promise<void> {
+        if (userId === requesterId) {
+            throw new ConflictException({
+                statusCode: 400,
+                error: 'CANNOT_REMOVE_SELF',
+                message: "Vous ne pouvez pas vous supprimer vous-même du groupe via cette action",
+            });
+        }
+
+        const memberToRemove = await this.prisma.db.groupMember.findUnique({
+            where: {
+                groupId_userId: {
+                    groupId,
+                    userId,
+                }
+            }
+        });
+
+        if (!memberToRemove) {
+            throw new NotFoundException({
+                statusCode: 404,
+                error: 'NOT_FOUND',
+                message: "Le membre est introuvable dans ce groupe",
+            });
+        }
+
+        await this.prisma.db.groupMember.delete({
+            where: {
+                groupId_userId: {
+                    groupId,
+                    userId,
+                }
+            }
+        });
+    }
+
+    async getGroupMembers(groupId: string) {
+        const members = await this.prisma.db.groupMember.findMany({
+            where: { groupId },
+            include: { user: true },
+            orderBy: { joinedAt: 'asc' },
+        });
+
+        return members.map(m => ({
+            id: m.userId,
+            name: m.user.name,
+            email: m.user.email,
+            avatarUrl: m.user.avatarUrl,
+            role: m.role,
+            joinedAt: m.joinedAt.toISOString(),
+        }));
     }
 }

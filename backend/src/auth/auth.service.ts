@@ -1,5 +1,5 @@
-import {
-  ConflictException,
+ConflictException,
+  ForbiddenException,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ERROR_CODES } from '@shared/constants/errors.js';
-import { TOKEN_EXPIRY_REFRESH_MS } from '@shared/constants/limits.js';
+import { TOKEN_EXPIRY_REFRESH_MS, MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
 import type { LoginInput, RegisterInput } from '@shared/schemas/auth.schema.js';
 import * as argon2 from 'argon2';
 import { createHash, randomUUID } from 'crypto';
@@ -61,6 +61,18 @@ export class AuthService {
       });
 
       if (invite && invite.expiresAt > new Date()) {
+        const activeMembersCount = await this.prismaService.db.groupMember.count({
+          where: { groupId: invite.groupId }
+        });
+
+        if (activeMembersCount >= MAX_GROUP_MEMBERS_FREE) {
+          throw new ForbiddenException({
+            statusCode: 403,
+            error: 'GROUP_FULL',
+            message: "Groupe plein — 6 membres maximum en plan Free",
+          });
+        }
+
         await this.prismaService.db.groupMember.create({
           data: {
             groupId: invite.groupId,

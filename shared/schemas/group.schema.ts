@@ -11,6 +11,8 @@ export const GroupResponseSchema = z.object({
     name: z.string(),
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
+    role: z.enum(['creator_admin', 'member']).optional(),
+    memberCount: z.number().optional(),
 });
 
 export type GroupResponse = z.infer<typeof GroupResponseSchema>;

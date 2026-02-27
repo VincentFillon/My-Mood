@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Body, Param, UseGuards, UseInterceptors } from '@nestjs/common';
 import { GroupsService } from './groups.service.js';
 import { CreateGroupSchema } from '@shared/schemas/group.schema.js';
 import type { CreateGroupDto, InviteUrlResponse } from '@shared/schemas/group.schema.js';
@@ -45,5 +45,24 @@ export class GroupsController {
         @CurrentUser('userId') userId: string,
     ) {
         return this.groupsService.joinGroup(userId, token);
+    }
+
+    @Delete(':groupId/members/:userId')
+    @UseGuards(GroupMemberGuard)
+    @Roles(MemberRole.creator_admin)
+    async removeMember(
+        @Param('groupId') groupId: string,
+        @Param('userId') targetUserId: string,
+        @CurrentUser('userId') requesterId: string,
+    ) {
+        await this.groupsService.removeMember(groupId, targetUserId, requesterId);
+        return { message: 'Membre révoqué avec succès' };
+    }
+
+    @Get(':groupId/members')
+    @UseGuards(GroupMemberGuard)
+    @Roles(MemberRole.creator_admin)
+    async getGroupMembers(@Param('groupId') groupId: string) {
+        return this.groupsService.getGroupMembers(groupId);
     }
 }

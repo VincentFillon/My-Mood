@@ -71,4 +71,17 @@ export class GroupsService {
             throw err;
         }
     }
+
+    async getGroupMembers(groupId: string): Promise<any[]> {
+        const response = await firstValueFrom(
+            this.#http.get<{ data: any[] }>(`${environment.apiUrl}/v1/groups/${groupId}/members`)
+        );
+        return response.data;
+    }
+
+    async removeMember(groupId: string, userId: string): Promise<void> {
+        await firstValueFrom(
+            this.#http.delete(`${environment.apiUrl}/v1/groups/${groupId}/members/${userId}`)
+        );
+    }
 }
