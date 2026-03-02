@@ -45,7 +45,7 @@ describe('FilesService', () => {
 
     // Mock the private s3 client's send method
     mockSend = jest.fn().mockResolvedValue({} as never);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     (service as any).s3 = { send: mockSend };
   });
 

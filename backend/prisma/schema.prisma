@@ -25,6 +25,8 @@ model User {
 
   refreshTokens RefreshToken[]
   groupMembers  GroupMember[]
+  moods         Mood[]
+  messages      Message[]
 
   @@map("users")
 }
@@ -48,6 +50,14 @@ enum MemberRole {
   member
 }
 
+enum MoodLevel {
+  awful
+  bad
+  neutral
+  good
+  great
+}
+
 model Group {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String   @db.VarChar(100)
@@ -56,6 +66,8 @@ model Group {
 
   members   GroupMember[]
   invites   GroupInvite[]
+  moods     Mood[]
+  messages  Message[]
 
   @@map("groups")
 }
@@ -87,4 +99,36 @@ model GroupInvite {
   @@index([groupId])
   @@index([token])
   @@map("group_invites")
+}
+
+model Mood {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  groupId   String    @map("group_id") @db.Uuid
+  moodLevel MoodLevel @map("mood_level")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([groupId])
+  @@map("moods")
+}
+
+model Message {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  groupId   String   @map("group_id") @db.Uuid
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([groupId])
+  @@map("messages")
 }

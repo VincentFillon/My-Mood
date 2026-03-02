@@ -40,4 +40,4 @@ import { GroupsModule } from './groups/groups.module.js';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

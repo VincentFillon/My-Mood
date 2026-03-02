@@ -50,16 +50,25 @@ describe('UsersController', () => {
     });
 
     it('should return signed URL when user has avatar', async () => {
-      const userWithAvatar = { ...mockUser, avatarUrl: 'users/user-uuid-1/avatar.png' };
+      const userWithAvatar = {
+        ...mockUser,
+        avatarUrl: 'users/user-uuid-1/avatar.png',
+      };
       mockUsersService.findById.mockResolvedValue(userWithAvatar);
-      mockFilesService.getSignedUrl.mockResolvedValue('https://signed-url.example.com/avatar.png');
+      mockFilesService.getSignedUrl.mockResolvedValue(
+        'https://signed-url.example.com/avatar.png',
+      );
 
       const result = await controller.getProfile({
         userId: 'user-uuid-1',
         email: 'test@example.com',
       });
-      expect(result.avatarUrl).toBe('https://signed-url.example.com/avatar.png');
-      expect(mockFilesService.getSignedUrl).toHaveBeenCalledWith('users/user-uuid-1/avatar.png');
+      expect(result.avatarUrl).toBe(
+        'https://signed-url.example.com/avatar.png',
+      );
+      expect(mockFilesService.getSignedUrl).toHaveBeenCalledWith(
+        'users/user-uuid-1/avatar.png',
+      );
     });
   });
 

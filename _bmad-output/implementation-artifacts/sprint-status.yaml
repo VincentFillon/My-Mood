@@ -60,7 +60,7 @@ development_status:
   2-1-creation-de-groupe-et-isolation-des-donnees-rls: done
   2-2-invitation-par-lien-unique-et-rejoindre-un-groupe: done
   2-3-gestion-des-membres-et-limites-du-plan-free: done
-  2-4-quitter-un-groupe: backlog
+  2-4-quitter-un-groupe: done
   epic-2-retrospective: optional
 
   # Epic 3: Grille d'Humeur & Interactions Sociales

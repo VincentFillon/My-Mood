@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { GroupsService } from '../groups.service.js';
 import { InviteUrlResponse } from '@shared/schemas/group.schema.js';
@@ -13,12 +13,17 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
   template: `
     <div class="container mx-auto p-4 max-w-4xl mt-8">
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold">
-          {{ groupsService.currentGroup()?.name || 'Groupe' }}
-        </h1>
-        <a routerLink="/groups" class="text-sm font-medium text-muted-foreground hover:underline">
-          &larr; Retour aux groupes
-        </a>
+        <div class="flex flex-col">
+            <h1 class="text-3xl font-bold">
+            {{ groupsService.currentGroup()?.name || 'Groupe' }}
+            </h1>
+            <a routerLink="/groups" class="text-sm font-medium text-muted-foreground hover:underline mt-1 inline-block">
+            &larr; Retour aux groupes
+            </a>
+        </div>
+        <button (click)="promptLeaveGroup()" class="text-sm px-4 py-2 border border-destructive text-destructive hover:bg-destructive/10 rounded-md font-medium transition-colors">
+            {{ isSoleAdmin() ? 'Supprimer le groupe' : 'Quitter le groupe' }}
+        </button>
       </div>
       
       <!-- Tabs -->
@@ -162,11 +167,51 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
           </div>
         </div>
       }
+
+      <!-- Leave/Delete Group Confirmation Modal -->
+      @if (showLeaveModal()) {
+        <div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div class="bg-card w-full max-w-md p-6 rounded-xl shadow-lg border">
+            <h3 class="text-lg font-semibold mb-2">
+                {{ isSoleAdmin() ? 'Supprimer le groupe' : 'Quitter le groupe' }}
+            </h3>
+            
+            <div class="text-sm text-muted-foreground mb-6">
+                @if (isAdmin() && !isSoleAdmin()) {
+                    <p class="mb-2 text-destructive font-medium">Vous ne pouvez pas quitter le groupe car vous êtes le créateur.</p>
+                    <p>Pour quitter, vous devez d'abord transférer votre rôle d'administrateur à un autre membre, ou bien supprimer tous les autres membres pour pouvoir supprimer le groupe.</p>
+                } @else if (isSoleAdmin()) {
+                    <p>Êtes-vous sûr de vouloir supprimer définitivement le groupe <strong>{{ groupsService.currentGroup()?.name }}</strong> ?</p>
+                    <p class="mt-2 text-destructive font-medium">Cette action est irréversible et supprimera toutes les données associées.</p>
+                } @else {
+                    <p>Êtes-vous sûr de vouloir quitter le groupe <strong>{{ groupsService.currentGroup()?.name }}</strong> ?</p>
+                    <p class="mt-2 text-destructive font-medium">Vous perdrez l'accès à toutes les données de ce groupe. Vos humeurs et messages dans ce groupe seront supprimés de façon irréversible.</p>
+                    <p class="mt-2 font-medium">Note : Votre compte principal et vos données dans les autres groupes ne seront pas affectés.</p>
+                }
+            </div>
+
+            <div class="flex justify-end gap-3">
+              <button (click)="showLeaveModal.set(false)" [disabled]="leavingGroup()" class="px-4 py-2 text-sm font-medium hover:bg-muted rounded-md transition-colors">
+                Annuler
+              </button>
+              @if (!isAdmin() || isSoleAdmin()) {
+                <button (click)="confirmLeaveGroup()" [disabled]="leavingGroup()" class="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors">
+                  {{ leavingGroup() ? 'En cours...' : 'Confirmer' }}
+                </button>
+              }
+            </div>
+            @if (leaveError()) {
+              <p class="text-sm text-destructive mt-4">{{ leaveError() }}</p>
+            }
+          </div>
+        </div>
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GroupDetailComponent {
+  router = inject(Router);
   groupsService = inject(GroupsService);
   activeTab = signal<'dashboard' | 'members'>('dashboard');
 
@@ -185,8 +230,13 @@ export class GroupDetailComponent {
   removingMember = signal(false);
   removeError = signal<string | null>(null);
 
+  showLeaveModal = signal(false);
+  leavingGroup = signal(false);
+  leaveError = signal<string | null>(null);
+
   isAdmin = computed(() => this.groupsService.currentGroup()?.role === 'creator_admin');
   isFull = computed(() => (this.groupsService.currentGroup()?.memberCount || 0) >= this.maxMembers);
+  isSoleAdmin = computed(() => this.isAdmin() && (this.groupsService.currentGroup()?.memberCount || 0) === 1);
 
   setActiveTab(tab: 'dashboard' | 'members') {
     this.activeTab.set(tab);
@@ -269,6 +319,38 @@ export class GroupDetailComponent {
       this.clipboard.copy(url);
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 3000);
+    }
+  }
+
+  promptLeaveGroup() {
+    this.showLeaveModal.set(true);
+    this.leaveError.set(null);
+  }
+
+  async confirmLeaveGroup() {
+    const groupId = this.groupsService.currentGroup()?.id;
+    if (!groupId) return;
+
+    this.leavingGroup.set(true);
+    this.leaveError.set(null);
+
+    try {
+      if (this.isSoleAdmin()) {
+        await this.groupsService.deleteGroup(groupId);
+      } else {
+        await this.groupsService.leaveGroup(groupId);
+      }
+
+      // Remove from local groups list and navigate away
+      this.groupsService.groups.update(groups => groups.filter(g => g.id !== groupId));
+      this.groupsService.currentGroup.set(null);
+      this.showLeaveModal.set(false);
+      this.router.navigate(['/groups']);
+
+    } catch (err: any) {
+      this.leaveError.set(err.error?.message || "Erreur lors de l'opération");
+    } finally {
+      this.leavingGroup.set(false);
     }
   }
 }

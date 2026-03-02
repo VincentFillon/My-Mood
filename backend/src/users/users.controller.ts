@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Put,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 import type { UpdateProfileInput } from '@shared/schemas/user.schema.js';
 import { UpdateProfileSchema } from '@shared/schemas/user.schema.js';
 import type { JwtPayload } from '../auth/decorators/current-user.decorator.js';

@@ -13,7 +13,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   constructor() {
     this.pool = new pg.Pool({ connectionString: process.env['DATABASE_URL'] });
     const adapter = new PrismaPg(this.pool);
-    this.client = new (PrismaClient as unknown as new (opts: { adapter: unknown }) => PrismaClient)({
+    this.client = new (PrismaClient as unknown as new (opts: {
+      adapter: unknown;
+    }) => PrismaClient)({
       adapter,
     });
     this.extendedClient = this.createExtendedClient();
@@ -29,12 +31,12 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
             const groupId = ctx?.groupId || '';
             const [, result] = await prisma.$transaction([
               prisma.$executeRaw`SELECT set_config('app.current_group_id', ${groupId}, true)`,
-              query(args)
+              query(args),
             ]);
             return result;
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 
@@ -47,7 +49,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await (this.client as unknown as { $disconnect(): Promise<void> }).$disconnect();
+    await (
+      this.client as unknown as { $disconnect(): Promise<void> }
+    ).$disconnect();
     await this.pool.end();
   }
 }

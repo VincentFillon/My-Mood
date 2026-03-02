@@ -41,7 +41,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         error = this.getErrorCode(statusCode);
       }
     } else {
-      this.logger.error('Unhandled exception', exception instanceof Error ? exception.stack : exception);
+      this.logger.error(
+        'Unhandled exception',
+        exception instanceof Error ? exception.stack : exception,
+      );
     }
 
     response.status(statusCode).json({
@@ -55,12 +58,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
   private getErrorCode(status: number): string {
     switch (status) {
-      case 400: return ERROR_CODES.VALIDATION_ERROR;
-      case 401: return ERROR_CODES.UNAUTHORIZED;
-      case 403: return ERROR_CODES.FORBIDDEN;
-      case 404: return ERROR_CODES.NOT_FOUND;
-      case 429: return ERROR_CODES.RATE_LIMITED;
-      default: return 'INTERNAL_ERROR';
+      case 400:
+        return ERROR_CODES.VALIDATION_ERROR;
+      case 401:
+        return ERROR_CODES.UNAUTHORIZED;
+      case 403:
+        return ERROR_CODES.FORBIDDEN;
+      case 404:
+        return ERROR_CODES.NOT_FOUND;
+      case 429:
+        return ERROR_CODES.RATE_LIMITED;
+      default:
+        return 'INTERNAL_ERROR';
     }
   }
 }

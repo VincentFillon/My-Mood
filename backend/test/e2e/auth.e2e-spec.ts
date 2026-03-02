@@ -10,7 +10,7 @@ import { PrismaService } from '../../src/prisma/prisma.service.js';
 function extractCookies(res: request.Response): string[] {
   const raw = res.headers['set-cookie'];
   if (!raw) return [];
-  return Array.isArray(raw) ? (raw as string[]) : [raw as string];
+  return Array.isArray(raw) ? (raw as string[]) : [raw];
 }
 
 function extractRefreshCookieValue(res: request.Response): string {
@@ -117,7 +117,6 @@ describe('Auth (e2e)', () => {
       expect(user!.passwordHash).not.toBe('password123');
       expect(user!.passwordHash).toMatch(/^\$argon2id\$/);
     });
-
   });
 
   describe('POST /api/v1/auth/login', () => {

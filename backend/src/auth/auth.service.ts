@@ -1,4 +1,5 @@
-ConflictException,
+import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -7,7 +8,10 @@ ConflictException,
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { ERROR_CODES } from '@shared/constants/errors.js';
-import { TOKEN_EXPIRY_REFRESH_MS, MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
+import {
+  TOKEN_EXPIRY_REFRESH_MS,
+  MAX_GROUP_MEMBERS_FREE,
+} from '@shared/constants/limits.js';
 import type { LoginInput, RegisterInput } from '@shared/schemas/auth.schema.js';
 import * as argon2 from 'argon2';
 import { createHash, randomUUID } from 'crypto';
@@ -28,7 +32,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
-  ) { }
+  ) {}
 
   async register(dto: RegisterInput) {
     const passwordHash = await argon2.hash(dto.password, {
@@ -61,15 +65,16 @@ export class AuthService {
       });
 
       if (invite && invite.expiresAt > new Date()) {
-        const activeMembersCount = await this.prismaService.db.groupMember.count({
-          where: { groupId: invite.groupId }
-        });
+        const activeMembersCount =
+          await this.prismaService.db.groupMember.count({
+            where: { groupId: invite.groupId },
+          });
 
         if (activeMembersCount >= MAX_GROUP_MEMBERS_FREE) {
           throw new ForbiddenException({
             statusCode: 403,
             error: 'GROUP_FULL',
-            message: "Groupe plein — 6 membres maximum en plan Free",
+            message: 'Groupe plein — 6 membres maximum en plan Free',
           });
         }
 
@@ -78,9 +83,11 @@ export class AuthService {
             groupId: invite.groupId,
             userId: user.id,
             role: MemberRole.member,
-          }
+          },
         });
-        this.logger.log(`User ${user.id} joined group ${invite.groupId} via invite`);
+        this.logger.log(
+          `User ${user.id} joined group ${invite.groupId} via invite`,
+        );
       }
     }
 

@@ -84,4 +84,16 @@ export class GroupsService {
             this.#http.delete(`${environment.apiUrl}/v1/groups/${groupId}/members/${userId}`)
         );
     }
+
+    async leaveGroup(groupId: string): Promise<void> {
+        await firstValueFrom(
+            this.#http.delete(`${environment.apiUrl}/v1/groups/${groupId}/leave`)
+        );
+    }
+
+    async deleteGroup(groupId: string): Promise<void> {
+        await firstValueFrom(
+            this.#http.delete(`${environment.apiUrl}/v1/groups/${groupId}`)
+        );
+    }
 }
