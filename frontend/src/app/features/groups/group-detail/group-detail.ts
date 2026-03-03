@@ -3,13 +3,16 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { GroupsService } from '../groups.service.js';
-import { InviteUrlResponse } from '@shared/schemas/group.schema.js';
-import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
+import { InviteUrlResponse } from '@shared/schemas/group.schema';
+import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits';
+import { CardComponent } from '../../../shared/ui/card/card';
+import { InputComponent } from '../../../shared/ui/input/input';
+import { ButtonComponent } from '../../../shared/ui/button/button';
 
 @Component({
   selector: 'app-group-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CardComponent, InputComponent, ButtonComponent],
   template: `
     <div class="container mx-auto p-4 max-w-4xl mt-8">
       <div class="flex items-center justify-between mb-6">
@@ -21,9 +24,9 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
             &larr; Retour aux groupes
             </a>
         </div>
-        <button (click)="promptLeaveGroup()" class="text-sm px-4 py-2 border border-destructive text-destructive hover:bg-destructive/10 rounded-md font-medium transition-colors">
+        <app-button variant="danger" (click)="promptLeaveGroup()">
             {{ isSoleAdmin() ? 'Supprimer le groupe' : 'Quitter le groupe' }}
-        </button>
+        </app-button>
       </div>
       
       <!-- Tabs -->
@@ -50,14 +53,14 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
 
       <!-- Content -->
       @if (activeTab() === 'dashboard') {
-        <div class="bg-card text-card-foreground border rounded-xl shadow-sm p-6 mb-8">
+        <app-card class="mb-8 block">
           <h2 class="text-xl font-semibold mb-2">Humeur du groupe</h2>
           <p class="text-muted-foreground">Les grilles d'humeur arriveront dans les prochaines itérations.</p>
-        </div>
+        </app-card>
       }
 
       @if (activeTab() === 'members' && isAdmin()) {
-        <div class="bg-card text-card-foreground border rounded-xl shadow-sm p-6 mb-8">
+        <app-card class="mb-8 block">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold">Administration des membres</h2>
             <span class="text-sm font-medium px-3 py-1 rounded-full" 
@@ -102,9 +105,9 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
                       </div>
                     </div>
                     @if (member.role !== 'creator_admin') {
-                      <button (click)="promptRemoveMember(member)" class="text-sm text-destructive hover:underline px-3 py-1">
+                      <app-button variant="ghost" size="sm" (click)="promptRemoveMember(member)" class="text-destructive">
                         Révoquer l'accès
-                      </button>
+                      </app-button>
                     }
                   </div>
                 }
@@ -117,20 +120,19 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
             <div class="p-4 bg-background">
               <p class="text-sm mb-4">Partagez ce lien unique avec votre équipe pour les inviter.</p>
               @if (generatedInvite()) {
-                <div class="flex gap-2 mb-2">
-                  <input type="text" readonly [value]="generatedInvite()?.url" class="flex-1 bg-muted/50 rounded-md border px-3 py-2 text-sm text-foreground">
-                  <button (click)="copyInviteLink()" class="rounded-md bg-secondary text-secondary-foreground h-10 px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors">Copier</button>
+                <div class="flex gap-2 mb-2 items-center">
+                  <app-input [disabled]="true" [value]="generatedInvite()?.url || ''" name="inviteUrl" class="flex-1" />
+                  <app-button variant="secondary" (click)="copyInviteLink()">Copier</app-button>
                 </div>
                 @if (copied()) {
                     <p class="text-sm text-green-600">Lien copié dans le presse-papier !</p>
                 }
               } @else {
                   <div class="flex items-center gap-4">
-                    <button (click)="generateInvite()" [disabled]="loadingInvite() || isFull()" 
-                            [title]="isFull() ? 'Groupe plein — ' + maxMembers + ' membres maximum en plan Free' : ''"
-                            class="rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+                    <app-button variant="primary" (click)="generateInvite()" [disabled]="loadingInvite() || isFull()" 
+                            [title]="isFull() ? 'Groupe plein — ' + maxMembers + ' membres maximum en plan Free' : ''">
                       {{ loadingInvite() ? 'Génération...' : 'Générer un lien d\\'invitation' }}
-                    </button>
+                    </app-button>
                     @if (isFull()) {
                       <span class="text-sm text-muted-foreground">Groupe plein — {{ maxMembers }} membres maximum.</span>
                     }
@@ -141,37 +143,37 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
               }
             </div>
           </div>
-        </div>
+        </app-card>
       }
 
       <!-- Revoke confirmation modal -->
       @if (memberToRemove()) {
         <div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div class="bg-card w-full max-w-md p-6 rounded-xl shadow-lg border">
+          <app-card class="w-full max-w-md p-6 shadow-lg border block">
             <h3 class="text-lg font-semibold mb-2">Révoquer l'accès</h3>
             <p class="text-sm text-muted-foreground mb-6">
               Êtes-vous sûr de vouloir révoquer l'accès de <strong>{{ memberToRemove()?.name }}</strong> ? 
               Toutes ses données liées à ce groupe seront supprimées.
             </p>
             <div class="flex justify-end gap-3">
-              <button (click)="memberToRemove.set(null)" [disabled]="removingMember()" class="px-4 py-2 text-sm font-medium hover:bg-muted rounded-md transition-colors">
+              <app-button variant="ghost" (click)="memberToRemove.set(null)" [disabled]="removingMember()">
                 Annuler
-              </button>
-              <button (click)="confirmRemoveMember()" [disabled]="removingMember()" class="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors">
+              </app-button>
+              <app-button variant="danger" (click)="confirmRemoveMember()" [disabled]="removingMember()">
                 {{ removingMember() ? 'Révocation...' : 'Confirmer la révocation' }}
-              </button>
+              </app-button>
             </div>
             @if (removeError()) {
               <p class="text-sm text-destructive mt-4">{{ removeError() }}</p>
             }
-          </div>
+          </app-card>
         </div>
       }
 
       <!-- Leave/Delete Group Confirmation Modal -->
       @if (showLeaveModal()) {
         <div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div class="bg-card w-full max-w-md p-6 rounded-xl shadow-lg border">
+          <app-card class="w-full max-w-md p-6 shadow-lg border block">
             <h3 class="text-lg font-semibold mb-2">
                 {{ isSoleAdmin() ? 'Supprimer le groupe' : 'Quitter le groupe' }}
             </h3>
@@ -191,19 +193,19 @@ import { MAX_GROUP_MEMBERS_FREE } from '@shared/constants/limits.js';
             </div>
 
             <div class="flex justify-end gap-3">
-              <button (click)="showLeaveModal.set(false)" [disabled]="leavingGroup()" class="px-4 py-2 text-sm font-medium hover:bg-muted rounded-md transition-colors">
+              <app-button variant="ghost" (click)="showLeaveModal.set(false)" [disabled]="leavingGroup()">
                 Annuler
-              </button>
+              </app-button>
               @if (!isAdmin() || isSoleAdmin()) {
-                <button (click)="confirmLeaveGroup()" [disabled]="leavingGroup()" class="px-4 py-2 text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md transition-colors">
+                <app-button variant="danger" (click)="confirmLeaveGroup()" [disabled]="leavingGroup()">
                   {{ leavingGroup() ? 'En cours...' : 'Confirmer' }}
-                </button>
+                </app-button>
               }
             </div>
             @if (leaveError()) {
               <p class="text-sm text-destructive mt-4">{{ leaveError() }}</p>
             }
-          </div>
+          </app-card>
         </div>
       }
     </div>

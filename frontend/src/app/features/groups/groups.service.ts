@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment.js';
-import { CreateGroupDto, GroupResponse, InviteUrlResponse } from '@shared/schemas/group.schema.js';
+import { environment } from '@env/environment';
+import { CreateGroupDto, GroupResponse, InviteUrlResponse } from '@shared/schemas/group.schema';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })

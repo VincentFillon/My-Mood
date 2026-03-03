@@ -3,14 +3,17 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GroupsService } from '../groups.service';
+import { CardComponent } from '../../../shared/ui/card/card';
+import { InputComponent } from '../../../shared/ui/input/input';
+import { ButtonComponent } from '../../../shared/ui/button/button';
 
 @Component({
     selector: 'app-group-create',
     standalone: true,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule],
+    imports: [CommonModule, RouterModule, ReactiveFormsModule, CardComponent, InputComponent, ButtonComponent],
     template: `
     <div class="container mx-auto p-4 max-w-md mt-12">
-      <div class="bg-card text-card-foreground border rounded-xl shadow-sm p-6">
+      <app-card>
         <h1 class="text-2xl font-bold mb-2">Créer un nouveau groupe</h1>
         <p class="text-muted-foreground mb-6">Un espace dédié pour partager votre humeur avec votre équipe.</p>
         
@@ -20,37 +23,30 @@ import { GroupsService } from '../groups.service';
           </div>
         }
 
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-          <div class="space-y-2">
-            <label for="name" class="text-sm font-medium leading-none">Nom du groupe</label>
-            <input 
-              id="name" 
-              type="text" 
-              formControlName="name"
-              placeholder="Ex: Équipe Alpha, Projet X..."
-              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              [class.border-destructive]="form.get('name')?.invalid && form.get('name')?.touched"
-            >
-            @if (form.get('name')?.invalid && form.get('name')?.touched) {
-               <p class="text-sm text-destructive mt-1">Le nom du groupe doit contenir entre 1 et 100 caractères.</p>
-            }
-          </div>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+          <app-input
+            label="Nom du groupe"
+            type="text"
+            formControlName="name"
+            placeholder="Ex: Équipe Alpha, Projet X..."
+            [error]="(form.get('name')?.invalid && form.get('name')?.touched) ? 'Le nom du groupe doit contenir entre 1 et 100 caractères.' : ''"
+          />
 
           <div class="flex items-center gap-4 mt-8">
-            <a routerLink="/groups" class="text-sm font-medium text-muted-foreground hover:text-foreground">Annuler</a>
-            <button 
+            <app-button routerLink="/groups" variant="ghost" class="ml-auto block w-fit">Annuler</app-button>
+            <app-button 
               type="submit" 
+              variant="primary"
               [disabled]="form.invalid || groupsService.loading()"
-              class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 font-medium hover:bg-primary/90 disabled:opacity-50 ml-auto"
             >
               @if (groupsService.loading()) {
-                <span class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-r-transparent"></span>
+                <span class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-r-transparent inline-block"></span>
               }
               Créer le groupe
-            </button>
+            </app-button>
           </div>
         </form>
-      </div>
+      </app-card>
     </div>
   `,
     changeDetection: ChangeDetectionStrategy.OnPush,

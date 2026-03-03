@@ -26,19 +26,19 @@ export const routes: Routes = [
   {
     path: 'groups',
     canActivate: [authGuard],
-    loadChildren: () => import('./features/groups/groups.routes.js').then((m) => m.routes),
+    loadChildren: () => import('./features/groups/groups.routes').then((m) => m.routes),
   },
   {
     path: 'invite/:token',
-    loadComponent: () => import('./features/groups/join-group/join-group.js').then((m) => m.JoinGroupComponent),
+    loadComponent: () => import('./features/groups/join-group/join-group').then((m) => m.JoinGroupComponent),
   },
   {
     path: '',
-    canActivate: [authGuard],
-    children: [],
+    pathMatch: 'full',
+    redirectTo: 'groups',
   },
   {
     path: '**',
-    redirectTo: '',
+    redirectTo: 'groups',
   },
 ];

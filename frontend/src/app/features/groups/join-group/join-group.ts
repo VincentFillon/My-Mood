@@ -1,16 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { GroupsService } from '../groups.service.js';
-import { AuthService } from '../../../core/auth/auth.service.js';
+import { GroupsService } from '../groups.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { CardComponent } from '../../../shared/ui/card/card';
+import { ButtonComponent } from '../../../shared/ui/button/button';
 
 @Component({
     selector: 'app-join-group',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, CardComponent, ButtonComponent],
     template: `
     <div class="min-h-[80vh] flex items-center justify-center p-4">
-      <div class="bg-card w-full max-w-md p-8 rounded-xl shadow-sm border text-center">
+      <app-card class="w-full max-w-md p-8 text-center block">
         @if (loading()) {
             <div class="animate-pulse flex flex-col items-center py-6">
                <div class="h-12 w-12 rounded-full bg-muted mb-4"></div>
@@ -27,12 +29,12 @@ import { AuthService } from '../../../core/auth/auth.service.js';
                 }
             </div>
             <div class="flex flex-col sm:flex-row gap-3 w-full">
-                <a routerLink="/groups" class="flex-1 inline-flex items-center justify-center rounded-md border border-input bg-background text-foreground h-10 px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground">
+                <app-button routerLink="/groups" variant="ghost" class="flex-1">
                   Retourner à mes groupes
-                </a>
-                <button (click)="requestNewLink()" [disabled]="requestSent()" class="flex-1 inline-flex items-center justify-center rounded-md bg-secondary text-secondary-foreground h-10 px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary/80 disabled:opacity-50">
+                </app-button>
+                <app-button (click)="requestNewLink()" variant="secondary" [disabled]="requestSent()" class="flex-1">
                   Demander un nouveau lien
-                </button>
+                </app-button>
             </div>
         } @else {
             <div class="text-green-600 mb-6 flex flex-col items-center">
@@ -40,11 +42,11 @@ import { AuthService } from '../../../core/auth/auth.service.js';
                 <h2 class="text-xl font-bold text-foreground mb-2">Succès !</h2>
                 <p class="text-sm text-foreground opacity-80 mb-6">{{ successMessage() }}</p>
             </div>
-            <button (click)="goToGroup()" class="w-full inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-10 px-4 py-2 text-sm font-medium transition-colors hover:bg-primary/90">
+            <app-button (click)="goToGroup()" class="w-full" variant="primary">
                 Accéder au groupe
-            </button>
+            </app-button>
         }
-      </div>
+      </app-card>
     </div>
   `,
     changeDetection: ChangeDetectionStrategy.OnPush,
